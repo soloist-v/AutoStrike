@@ -1,8 +1,7 @@
 import time
 
 import cv2
-from toolset.image_tools import auto_resize, walk_img
-import os
+from tools.image_tools import auto_resize, walk_img
 import onnxruntime
 import numpy as np
 
