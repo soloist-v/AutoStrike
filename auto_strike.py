@@ -1,7 +1,6 @@
 import os
 import random
 import warnings
-
 import cv2
 import numpy as np
 import datetime as dt
@@ -63,7 +62,7 @@ class AutoStrike:
     flag_is_update_state = 0
     flag_is_run = 1
 
-    def __init__(self, path, win_size=(256, 192), daemon=True):
+    def __init__(self, path: str, win_size=(256, 192), daemon=True):
         self.window_name = "CrossFire"
         self._proc = None
         self.daemon = daemon
