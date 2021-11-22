@@ -200,9 +200,10 @@ class AutoStrike:
             self.target_coord.set(x, y, w, h)
 
     def switch_weapon(self):
-        key_press("q", 0.1)
-        time.sleep(0.12)
-        key_press("q", 0.1)
+        pass
+        # key_press("q", 0.1)
+        # time.sleep(0.12)
+        # key_press("q", 0.1)
 
     def fire(self):
         mouse_left_press(0.1)
