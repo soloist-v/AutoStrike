@@ -12,6 +12,8 @@ elif msdk.STATE:
     from msdk import mouse_move_relative, mouse_left_press
 elif mobox_km.STATE:
     from mobox_km import mouse_move_relative, mouse_left_press
+else:
+    print("你的电脑没有控制鼠标的硬件，无法使用！")
 
 VK_CODE = {
     "A": 0x41, "B": 0x42, "C": 0x43, "D": 0x44, "E": 0x45, "F": 0x46, "G": 0x47, "H": 0x48, "I": 0x49, "J": 0x4A,
