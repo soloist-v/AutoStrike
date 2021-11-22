@@ -8,7 +8,7 @@ from tools.prediction import Predictor
 from multiprocessing import Process
 from tools.shared import zeros, zeros_like
 from ctypes import c_float, c_int, c_bool
-from tools.key_mouse import move_relative, key_press, mouse_left_press, VK_CODE, get_key_state
+from tools.mouse import move_relative, mouse_left_press, VK_CODE, get_key_state
 from tools.screen_server import ScreenShoot, ScreenShootFast
 from tools.window_capture import WindowCaptureDll
 from tools.windows import find_window, get_screen_size, get_window_rect, grab_screen

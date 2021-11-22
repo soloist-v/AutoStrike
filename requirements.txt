@@ -8,8 +8,8 @@ Pillow>=7.1.2
 PyYAML>=5.3.1
 requests>=2.23.0
 scipy>=1.4.1
-torch>=1.7.0
-torchvision>=0.8.1
+torch~=1.6.0
+torchvision~=0.7.0
 tqdm>=4.41.0
 
 # Logging -------------------------------------
@@ -17,8 +17,8 @@ tensorboard>=2.4.1
 # wandb
 
 # Plotting ------------------------------------
-pandas>=1.1.4
-seaborn>=0.11.0
+pandas~=1.0.5
+seaborn~=0.10.1
 
 # Export --------------------------------------
 # coremltools>=4.1  # CoreML export
@@ -34,3 +34,17 @@ seaborn>=0.11.0
 # pycocotools>=2.0  # COCO mAP
 # roboflow
 thop  # FLOPs computation
+
+pywin32~=227
+filelock~=3.0.12
+paramiko~=2.7.1
+pyqt5~=5.15.0
+pytz~=2020.1
+toolset~=1.0
+watchdog~=0.10.3
+xmltodict~=0.12.0
+scikit-image~=0.16.2
+yaml~=0.2.5
+flask~=1.1.2
+onnxruntime~=1.9.0
+mss~=6.1.0

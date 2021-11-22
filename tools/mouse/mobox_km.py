@@ -260,8 +260,8 @@ def wait_mouse_right_press():
     wait_key_press(VK_CODE["r_button"])
 
 
-ret = km.OpenDevice
-if ret:
+STATE = km.OpenDevice
+if STATE:
     print("km connected.")
 else:
     print("未连接")
