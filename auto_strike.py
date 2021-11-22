@@ -220,30 +220,30 @@ class AutoStrike:
         key_5 = VK_CODE['5']
         key_6 = VK_CODE['6']
         while True:
-            if get_key_state(key_end):
+            if get_key_state(key_end):  # 结束end
                 break
-            elif get_key_state(key_5):
+            elif get_key_state(key_5):  # 5 开启瞬狙
                 sniper = True
                 time.sleep(0.1)
                 print("sniper:>>", sniper)
                 continue
-            elif get_key_state(key_6):
+            elif get_key_state(key_6):  # 6 关闭瞬狙
                 sniper = False
                 time.sleep(0.1)
                 print("sniper:>>", sniper)
                 continue
-            elif get_key_state(key_f):
+            elif get_key_state(key_f):  # 更新窗口信息并截图
                 time.sleep(0.1)
                 print("更新窗口信息")
                 self.is_update_state = True
                 self.update_win_state()
-            elif get_key_state(key_kh_left):
+            elif get_key_state(key_kh_left):  # '[' 键 开启自瞄
                 time.sleep(0.1)
                 print("开启。。。。。。。。。。。。。")
                 self.is_run = True
                 self.is_update_state = True
                 self.update_win_state()
-            elif get_key_state(key_kh_right):
+            elif get_key_state(key_kh_right):  # ']' 键 暂停自瞄
                 time.sleep(0.1)
                 print("关闭。。。。。。。。。。。。")
                 self.is_run = False
