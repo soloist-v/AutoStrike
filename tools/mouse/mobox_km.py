@@ -264,7 +264,7 @@ STATE = km.OpenDevice
 if STATE:
     print("km connected.")
 else:
-    print("未连接")
+    print("km 未连接")
 
 if __name__ == '__main__':
     # mouse_right_press()
