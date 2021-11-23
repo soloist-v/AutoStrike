@@ -113,8 +113,6 @@ class AutoStrike:
         return x0, y0, x1, y1, hw
 
     def control_mouse(self, dx, dy, w, h, speed):
-        # speed = ((2 / (self.s_width ** 2)) * (dx ** 2) + (2 / (self.s_height ** 2)) * dy ** 2) / 2
-        # speed = (((dx / self.width) ** 2) + ((dy / self.height) ** 2)) * rate
         rate = ((w / self.s_width * self.ratio_w) + (h / self.s_height) * self.ratio_h) * 0.5
         dx *= rate
         dy *= rate
