@@ -13,7 +13,7 @@ from tools.mouse import move_relative, mouse_left_press, VK_CODE, get_key_state,
 from tools.screen_server import ScreenShoot, ScreenShootFast
 from tools.window_capture import WindowCaptureDll
 from tools.windows import find_window, get_screen_size, get_window_rect, grab_screen
-from tools.utils import set_dpi, FOV, is_admin
+from tools.utils import set_dpi, FOV, is_admin, set_high_priority
 from tools.shared import release_last_shm
 import ctypes as ct
 import math
@@ -112,10 +112,11 @@ class AutoStrike:
             speed *= 0.5
         dx = dx * ratio * speed  # * ratio
         dy = dy * ratio * speed  # * ratio
-        print(dx, dy)
+        print(ratio, dx, dy)
         move_relative(dx, dy)
 
     def update_win_state(self):
+        print("更新窗口信息")
         x0, y0, x1, y1, hw = self.get_game_info()
         w = x1 - x0
         h = y1 - y0
@@ -143,6 +144,7 @@ class AutoStrike:
 
     def get_best_object(self, boxes, scores, center):
         res = []
+        c_x, c_y = center
         for (x1, y1, x2, y2), score in zip(boxes, scores):
             # 转换为真是坐标
             x1 += self.x0
@@ -150,10 +152,11 @@ class AutoStrike:
             x2 += self.x0
             y2 += self.y0
             w, h = x2 - x1, y2 - y1
-            p = (x1 + x2) // 2, (y1 + y2) // 2  # int(y1 + h * self.rate)
-            dist = math.dist(p, center)
-            dist = (math.sqrt(w * h) / dist if dist else 999)
-            res.append((dist * score, *p, w, h))
+            x, y = (x1 + x2) // 2, (y1 + y2) // 2  # int(y1 + h * self.rate)
+            # dist = math.dist((x, y), center)
+            dist = abs(x - c_x) + abs(y - c_y)
+            # dist = (math.sqrt(w * h) / dist if dist else 999)
+            res.append((dist, x, y, w, h))
         res.sort(key=lambda x: x[0])
         res = res[-1]
         return res[1:]
@@ -197,7 +200,9 @@ class AutoStrike:
         -------------------
         tip: 左键按下就会自动瞄准，松开停止，右键按下就会自动瞄准和自动开火(狙击开镜使用最好)，松开停止.
         """)
+        # set_high_priority()
         while True:
+            # t0 = time.time()
             if self.is_update_state:
                 self.update_win_state()
                 self.is_update_state = False
@@ -212,6 +217,7 @@ class AutoStrike:
                 continue
             x, y, w, h = self.get_best_object(boxes, scores, (self.x_center, self.y_center))
             self.target_coord.set(x, y, w, h)
+            # print("time:>>", (time.time() - t0))
 
     def switch_weapon(self):
         key_press("q", 0.1)
@@ -247,7 +253,6 @@ class AutoStrike:
                 continue
             elif get_key_state(key_f):  # 更新窗口信息并截图
                 time.sleep(0.1)
-                print("更新窗口信息")
                 self.is_update_state = True
                 self.update_win_state()
             elif get_key_state(key_kh_left):  # '[' 键 开启自瞄
@@ -272,7 +277,7 @@ class AutoStrike:
                 if abs(dx) <= 1 / 4 * w and abs(dy) <= 2 / 5 * h:  # 查看是否已经指向目标
                     # self.fire()
                     continue
-                self.control_mouse(dx, dy - h * 0.37, w, h, 0.75)
+                self.control_mouse(dx, dy - h * 0.37, w, h, 1)
             if get_key_state(key_r_button):  # 鼠标右键
                 if abs(dx) <= 1 / 5 * w and abs(dy) <= 1 / 5 * h:  # 查看是否已经指向目标
                     self.fire()
