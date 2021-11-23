@@ -2,6 +2,8 @@ import win32gui
 from win32api import GetAsyncKeyState
 import win32com.client as com
 import time
+import pywintypes
+from win32com.universal import com_error
 
 from win32con import SPI_GETMOUSE, SPI_SETMOUSE, SPI_GETMOUSESPEED, SPI_SETMOUSESPEED
 
@@ -32,10 +34,10 @@ try:
         print("km connected.")
     else:
         print("km 未连接")
-except Exception as e:
-    print(e)
+except com_error:
     STATE = False
     mk = None
+
 MOUSE_LEFT_KET_DOWN = 1
 MOUSE_LEFT_KEY_UP = 2
 MOUSE_RIGHT_KEY_DOWN = 3
