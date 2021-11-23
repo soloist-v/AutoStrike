@@ -10,6 +10,7 @@ if logitech_km.STATE:
 elif msdk.STATE:
     from .msdk import mouse_move_relative, mouse_left_press, key_press, SK_CODE
 elif mobox_km.STATE:
+    print(mobox_km.STATE)
     from .mobox_km import mouse_move_relative, mouse_left_press, key_press, SK_CODE
 else:
     print("你的电脑没有控制鼠标的硬件，无法使用！")
