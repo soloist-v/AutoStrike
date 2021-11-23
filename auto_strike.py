@@ -277,8 +277,21 @@ class AutoStrike:
 
 if __name__ == '__main__':
     release_last_shm()  # 开始之前调用一下，防止之前异常推出后未释放共享内存
-    app = AutoStrike(r"weights/yolov5n.pt", win_size=(256, 192))
+    num = input("选择模型: 1-yolov5n, 2-yolov5s ?").strip()
+    version = {"1": "n", "2": "s"}.get(num) or "n"
+    app = AutoStrike(f"weights/yolov5{version}.pt", win_size=(256, 192))
     app.start()
+    print("""
+    按键说明:
+    -------------------
+    |1. 开启--- [      |
+    |2. 暂停--- ]      |
+    |3. 截图--- F      |
+    |4. 开瞬狙- 5      |
+    |6. 关瞬狙- 6      |
+    |7. 退出-- end     |    
+    -------------------
+    """)
     app.control()
     cv2.destroyAllWindows()
     release_last_shm()
