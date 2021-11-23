@@ -1,5 +1,6 @@
 import os
 import random
+import sys
 import warnings
 import cv2
 import numpy as np
@@ -87,7 +88,7 @@ class AutoStrike:
         self.screenShoot = ScreenShootFast(self.x0, self.y0, self.width, self.height)
         self.screenShoot.start()
 
-    def wait_game_start(self):
+    def get_game_info(self):
         set_dpi()
         count = 0
         while True:
@@ -115,7 +116,7 @@ class AutoStrike:
         move_relative(dx, dy)
 
     def update_win_state(self):
-        x0, y0, x1, y1, hw = self.wait_game_start()
+        x0, y0, x1, y1, hw = self.get_game_info()
         w = x1 - x0
         h = y1 - y0
         self.window_hwnd = hw
@@ -183,6 +184,19 @@ class AutoStrike:
         else:
             cap = self.screenShoot
         predictor = Predictor(self.path, "cuda:0", imgsz=(self.width, self.height), conf_thres=0.4)
+        print("""
+        启动完毕
+        按键说明:
+        -------------------
+        | 1. 开启》--- [   |
+        | 2. 暂停》--- ]   |
+        | 3. 截图》--- F   |
+        | 4. 开瞬狙--- 5   |
+        | 5. 关瞬狙--- 6   |
+        | 6. 退出》--- end |    
+        -------------------
+        tip: 左键按下就会自动瞄准，松开停止，右键按下就会自动瞄准和自动开火(狙击开镜使用最好)，松开停止.
+        """)
         while True:
             if self.is_update_state:
                 self.update_win_state()
@@ -276,24 +290,13 @@ class AutoStrike:
 
 
 if __name__ == '__main__':
+    os.makedirs("logs", exist_ok=True)
     release_last_shm()  # 开始之前调用一下，防止之前异常推出后未释放共享内存
     if is_admin():
         num = input("选择模型: 1-yolov5n, 2-yolov5s ?").strip()
         version = {"1": "n", "2": "s"}.get(num) or "n"
         app = AutoStrike(f"weights/yolov5{version}.pt", win_size=(256, 192))
         app.start()
-        print("""
-        按键说明:
-        -------------------
-        | 1. 开启》--- [   |
-        | 2. 暂停》--- ]   |
-        | 3. 截图》--- F   |
-        | 4. 开瞬狙--- 5   |
-        | 5. 关瞬狙--- 6   |
-        | 6. 退出》--- end |    
-        -------------------
-        tip: 左键按下就会自动瞄准，松开停止，右键按下就会自动瞄准和自动开火(狙击开镜使用最好)，松开停止.
-        """)
         app.control()
         cv2.destroyAllWindows()
     else:
