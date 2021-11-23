@@ -93,7 +93,7 @@ class AutoStrike:
         count = 0
         while True:
             if count % 20 == 0:
-                print(f"等待{self.window_name}启动......")
+                print(f"find {self.window_name} window.")
             count += 1
             hw = find_window(self.window_name)
             if hw != 0:
