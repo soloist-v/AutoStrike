@@ -58,6 +58,16 @@ class ShareCoord:
         return self._value[self.idx_h]
 
 
+def calc_xy(dx, dy, max_val):
+    if abs(dx) > abs(dy):
+        dy = dy / dx * max_val
+        dx = max_val
+    else:
+        dx = dx / dy * max_val
+        dy = max_val
+    return dx, dy
+
+
 class AutoStrike:
     flag_is_update_state = 0
     flag_is_run = 1
@@ -105,14 +115,22 @@ class AutoStrike:
     def control_mouse(self, dx, dy, w, h, speed):
         # speed = ((2 / (self.s_width ** 2)) * (dx ** 2) + (2 / (self.s_height ** 2)) * dy ** 2) / 2
         # speed = (((dx / self.width) ** 2) + ((dy / self.height) ** 2)) * rate
-        ratio = ((w / self.s_width * self.ratio_w) + (h / self.s_height) * self.ratio_h) * 0.5
+        # ratio = ((w / self.s_width * self.ratio_w) + (h / self.s_height) * self.ratio_h) * 0.5
         dx = FOV(dx, self.side_len) / self.DPI_Var * 0.971
         dy = FOV(dy, self.side_len) / self.DPI_Var * 0.971
-        if dx < 10 or dy < 10:
-            speed *= 0.5
-        dx = dx * ratio * speed  # * ratio
-        dy = dy * ratio * speed  # * ratio
-        print(ratio, dx, dy)
+        _m = max(abs(dx), abs(dy))
+        if _m < 0:
+            dx, dy = calc_xy(dx, dy, 1)
+        elif _m < 5:
+            dx, dy = calc_xy(dx, dy, 1)
+        elif _m < 10:
+            dx, dy = calc_xy(dx, dy, 5)
+        elif _m < 20:
+            dx, dy = calc_xy(dx, dy, 8)
+        else:
+            dx = dx * speed  # * ratio
+            dy = dy * speed  # * ratio
+        print(dx, dy)
         move_relative(dx, dy)
 
     def update_win_state(self):
