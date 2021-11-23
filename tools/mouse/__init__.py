@@ -8,9 +8,9 @@ from win32con import SPI_SETMOUSE, SPI_GETMOUSE, SPI_GETMOUSESPEED, SPI_SETMOUSE
 if logitech_km.STATE:
     from .logitech_km import mouse_move_relative, mouse_left_press, key_press, SK_CODE
 elif msdk.STATE:
-    from msdk import mouse_move_relative, mouse_left_press, key_press, SK_CODE
+    from .msdk import mouse_move_relative, mouse_left_press, key_press, SK_CODE
 elif mobox_km.STATE:
-    from mobox_km import mouse_move_relative, mouse_left_press, key_press, SK_CODE
+    from .mobox_km import mouse_move_relative, mouse_left_press, key_press, SK_CODE
 else:
     print("你的电脑没有控制鼠标的硬件，无法使用！")
 
