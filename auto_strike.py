@@ -118,18 +118,10 @@ class AutoStrike:
         dy = FOV(dy, self.side_len) / self.DPI_Var * 0.971
         src_x, src_y = dx, dy
         _m = max(abs(dx), abs(dy))
-        if _m < 100:
-            speed *= _m / 100
-        elif _m < 200:
-            speed *= _m / 200
-        elif _m < 300:
-            speed *= _m / 300
-        elif _m < 400:
-            speed *= _m / 400
-        elif _m < 500:
-            speed *= _m / 500
-        else:
-            speed *= _m * 2 / (self.s_height + self.s_width)
+        for i in range(100, self.s_width, 100):
+            if _m < i:
+                speed *= _m / i
+                break
         dx *= rate * speed
         dy *= rate * speed
         print(src_x, src_y, dx, dy, _m)
