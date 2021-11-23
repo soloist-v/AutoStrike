@@ -83,7 +83,7 @@ class AutoStrike:
         self.side_len = 600
         self.ratio_w = self.s_width / self.width
         self.ratio_h = self.s_height / self.height
-        self.update_win_state()
+        # self.update_win_state()
         self.screenShoot = ScreenShootFast(self.x0, self.y0, self.width, self.height)
         self.screenShoot.start()
 
@@ -285,14 +285,14 @@ if __name__ == '__main__':
         print("""
         按键说明:
         -------------------
-        |1. 开启--- [      |
-        |2. 暂停--- ]      |
-        |3. 截图--- F      |
-        |4. 开瞬狙- 5      |
-        |6. 关瞬狙- 6      |
-        |7. 退出-- end     |    
-        tip: 左键按下就会自动瞄准，松开停止，右键按下就会自动瞄准和自动开火(狙击开镜使用最好)，松开停止.
+        | 1. 开启》--- [   |
+        | 2. 暂停》--- ]   |
+        | 3. 截图》--- F   |
+        | 4. 开瞬狙--- 5   |
+        | 6. 关瞬狙--- 6   |
+        | 7. 退出》--- end |    
         -------------------
+        tip: 左键按下就会自动瞄准，松开停止，右键按下就会自动瞄准和自动开火(狙击开镜使用最好)，松开停止.
         """)
         app.control()
         cv2.destroyAllWindows()

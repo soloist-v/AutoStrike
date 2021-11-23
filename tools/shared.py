@@ -1,7 +1,7 @@
 from typing import Any
 import json
 import numpy as np
-from ctypes import c_uint8, sizeof, POINTER, cast
+from ctypes import c_uint8, sizeof, POINTER, cast, WinError
 from typing import Union, List
 import os
 import secrets
@@ -68,7 +68,8 @@ class SharedMemoryRecorder:
                         sm.close()
                         sm.unlink()
                     except Exception as e:
-                        print(e)
+                        print(str(e).split()[-1], end=";")
+                print()
                 os.remove(cls.cache_names_file)
 
     @classmethod
