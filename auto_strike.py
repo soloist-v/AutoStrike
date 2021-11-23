@@ -12,7 +12,7 @@ from tools.mouse import move_relative, mouse_left_press, VK_CODE, get_key_state,
 from tools.screen_server import ScreenShoot, ScreenShootFast
 from tools.window_capture import WindowCaptureDll
 from tools.windows import find_window, get_screen_size, get_window_rect, grab_screen
-from tools.utils import set_dpi, FOV
+from tools.utils import set_dpi, FOV, is_admin
 from tools.shared import release_last_shm
 import ctypes as ct
 import math
@@ -277,22 +277,25 @@ class AutoStrike:
 
 if __name__ == '__main__':
     release_last_shm()  # 开始之前调用一下，防止之前异常推出后未释放共享内存
-    num = input("选择模型: 1-yolov5n, 2-yolov5s ?").strip()
-    version = {"1": "n", "2": "s"}.get(num) or "n"
-    app = AutoStrike(f"weights/yolov5{version}.pt", win_size=(256, 192))
-    app.start()
-    print("""
-    按键说明:
-    -------------------
-    |1. 开启--- [      |
-    |2. 暂停--- ]      |
-    |3. 截图--- F      |
-    |4. 开瞬狙- 5      |
-    |6. 关瞬狙- 6      |
-    |7. 退出-- end     |    
-    tip: 左键按下就会自动瞄准，松开停止，右键按下就会自动瞄准和自动开火(狙击开镜使用最好)，松开停止.
-    -------------------
-    """)
-    app.control()
-    cv2.destroyAllWindows()
+    if is_admin():
+        num = input("选择模型: 1-yolov5n, 2-yolov5s ?").strip()
+        version = {"1": "n", "2": "s"}.get(num) or "n"
+        app = AutoStrike(f"weights/yolov5{version}.pt", win_size=(256, 192))
+        app.start()
+        print("""
+        按键说明:
+        -------------------
+        |1. 开启--- [      |
+        |2. 暂停--- ]      |
+        |3. 截图--- F      |
+        |4. 开瞬狙- 5      |
+        |6. 关瞬狙- 6      |
+        |7. 退出-- end     |    
+        tip: 左键按下就会自动瞄准，松开停止，右键按下就会自动瞄准和自动开火(狙击开镜使用最好)，松开停止.
+        -------------------
+        """)
+        app.control()
+        cv2.destroyAllWindows()
+    else:
+        print("请以管理员权限启动程序.")
     release_last_shm()
