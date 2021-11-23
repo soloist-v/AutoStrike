@@ -60,11 +60,11 @@ class ShareCoord:
 
 def calc_xy(dx, dy, max_val):
     if abs(dx) > abs(dy):
-        dy = dy / dx * max_val
-        dx = max_val
+        dy = dy / abs(dx) * max_val
+        dx = max_val if dx > 0 else -max_val
     else:
-        dx = dx / dy * max_val
-        dy = max_val
+        dx = dx / abs(dy) * max_val
+        dy = max_val if dy > 0 else -max_val
     return dx, dy
 
 
@@ -118,17 +118,20 @@ class AutoStrike:
         # ratio = ((w / self.s_width * self.ratio_w) + (h / self.s_height) * self.ratio_h) * 0.5
         dx = FOV(dx, self.side_len) / self.DPI_Var * 0.971
         dy = FOV(dy, self.side_len) / self.DPI_Var * 0.971
+        src_x, src_y = dx, dy
         _m = max(abs(dx), abs(dy))
         if _m < 5:
             dx, dy = calc_xy(dx, dy, 1)
         elif _m < 10:
-            dx, dy = calc_xy(dx, dy, 5)
+            dx, dy = calc_xy(dx, dy, 3)
         elif _m < 20:
+            dx, dy = calc_xy(dx, dy, 6)
+        elif _m < 40:
             dx, dy = calc_xy(dx, dy, 8)
         else:
             dx = dx * speed  # * ratio
             dy = dy * speed  # * ratio
-        print(dx, dy)
+        print(src_x, src_y, dx, dy, _m)
         move_relative(dx, dy)
 
     def update_win_state(self):
