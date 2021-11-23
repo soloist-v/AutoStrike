@@ -1,3 +1,4 @@
+echo "note: 请自行安装cuda>=11.3版本"
 pip install numpy
 pip install opencv-python
 pip install pywin32 -U
