@@ -121,13 +121,21 @@ class AutoStrike:
         src_x, src_y = dx, dy
         _m = max(abs(dx), abs(dy))
         if _m < 5:
-            dx, dy = calc_xy(dx, dy, 1)
+            dx *= 0.05
+            dy *= 0.05
+            # dx, dy = calc_xy(dx, dy, 1)
         elif _m < 10:
-            dx, dy = calc_xy(dx, dy, 3)
+            dx *= 0.1
+            dy *= 0.1
+            # dx, dy = calc_xy(dx, dy, 3)
         elif _m < 20:
-            dx, dy = calc_xy(dx, dy, 6)
+            dx *= 0.2
+            dy *= 0.2
+            # dx, dy = calc_xy(dx, dy, 6)
         elif _m < 40:
-            dx, dy = calc_xy(dx, dy, 8)
+            dx *= 0.4
+            dy *= 0.4
+            # dx, dy = calc_xy(dx, dy, 8)
         else:
             dx = dx * speed * ratio
             dy = dy * speed * ratio
