@@ -15,7 +15,6 @@ from tools.windows import find_window, get_screen_size, get_window_rect, grab_sc
 from tools.utils import set_dpi, FOV
 from tools.shared import release_last_shm
 import ctypes as ct
-from math import pow
 import math
 import time
 
