@@ -2,7 +2,6 @@ import win32gui
 from win32api import GetAsyncKeyState
 import win32com.client as com
 import time
-import pywintypes
 from win32com.universal import com_error
 
 from win32con import SPI_GETMOUSE, SPI_SETMOUSE, SPI_GETMOUSESPEED, SPI_SETMOUSESPEED
