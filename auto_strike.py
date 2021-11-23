@@ -8,7 +8,7 @@ from tools.prediction import Predictor
 from multiprocessing import Process
 from tools.shared import zeros, zeros_like
 from ctypes import c_float, c_int, c_bool
-from tools.mouse import move_relative, mouse_left_press, VK_CODE, get_key_state
+from tools.mouse import move_relative, mouse_left_press, VK_CODE, get_key_state, key_press
 from tools.screen_server import ScreenShoot, ScreenShootFast
 from tools.window_capture import WindowCaptureDll
 from tools.windows import find_window, get_screen_size, get_window_rect, grab_screen
@@ -62,16 +62,13 @@ class AutoStrike:
     flag_is_update_state = 0
     flag_is_run = 1
 
-    def __init__(self, path: str, win_size=(256, 192), daemon=True):
-        self.window_name = "CrossFire"
+    def __init__(self, path: str, win_size=(256, 192), window_name="CrossFire", ):
+        self.window_name = window_name
         self._proc = None
-        self.daemon = daemon
+        self.daemon = True
         self.path = path
         self.width, self.height = win_size
         self.s_width, self.s_height = get_screen_size(True)
-        # if self.s_width >= 1920:
-        #     self.width = 320
-        #     self.height = 320
         print("screen width:", self.s_width, "screen height:", self.s_height)
         self.x0 = (self.s_width - self.width) // 2
         self.y0 = (self.s_height - self.height) // 2
@@ -87,13 +84,17 @@ class AutoStrike:
         self.side_len = 600
         self.ratio_w = self.s_width / self.width
         self.ratio_h = self.s_height / self.height
-        # self.update_win_state()
+        self.update_win_state()
         self.screenShoot = ScreenShootFast(self.x0, self.y0, self.width, self.height)
         self.screenShoot.start()
 
     def wait_game_start(self):
         set_dpi()
+        count = 0
         while True:
+            if count % 20 == 0:
+                print(f"等待{self.window_name}启动......")
+            count += 1
             hw = find_window(self.window_name)
             if hw != 0:
                 x0, y0, x1, y1 = get_window_rect(hw)
@@ -200,10 +201,9 @@ class AutoStrike:
             self.target_coord.set(x, y, w, h)
 
     def switch_weapon(self):
-        pass
-        # key_press("q", 0.1)
-        # time.sleep(0.12)
-        # key_press("q", 0.1)
+        key_press("q", 0.1)
+        time.sleep(0.12)
+        key_press("q", 0.1)
 
     def fire(self):
         mouse_left_press(0.1)
@@ -278,7 +278,7 @@ class AutoStrike:
 
 if __name__ == '__main__':
     release_last_shm()  # 开始之前调用一下，防止之前异常推出后未释放共享内存
-    app = AutoStrike(r"weights/yolov5s.pt", win_size=(256, 192))
+    app = AutoStrike(r"weights/yolov5n.pt", win_size=(256, 192))
     app.start()
     app.control()
     cv2.destroyAllWindows()

@@ -2,6 +2,7 @@ import time
 from ctypes import CDLL, c_int, c_int64
 from os import path
 from typing import Union
+from collections import defaultdict
 
 basedir = path.dirname(path.abspath(__file__))
 msdkdlldir = path.join(basedir, 'msdk.dll')
@@ -89,3 +90,13 @@ def mouse_left_press(interval: Union[int, float]):
     mouse_down(1)
     time.sleep(interval)
     mouse_up()
+
+
+def key_press(key_name: str, interval=0):
+    pass
+
+
+SK_CODE = defaultdict(int,
+                      **{
+                          'q': 81
+                      })

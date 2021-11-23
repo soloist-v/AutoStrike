@@ -1,5 +1,4 @@
 from win32api import GetAsyncKeyState
-
 from . import logitech_km
 from . import mobox_km
 from . import msdk
@@ -7,11 +6,11 @@ import win32gui
 from win32con import SPI_SETMOUSE, SPI_GETMOUSE, SPI_GETMOUSESPEED, SPI_SETMOUSESPEED
 
 if logitech_km.STATE:
-    from .logitech_km import mouse_move_relative, mouse_left_press
+    from .logitech_km import mouse_move_relative, mouse_left_press, key_press, SK_CODE
 elif msdk.STATE:
-    from msdk import mouse_move_relative, mouse_left_press
+    from msdk import mouse_move_relative, mouse_left_press, key_press, SK_CODE
 elif mobox_km.STATE:
-    from mobox_km import mouse_move_relative, mouse_left_press
+    from mobox_km import mouse_move_relative, mouse_left_press, key_press, SK_CODE
 else:
     print("你的电脑没有控制鼠标的硬件，无法使用！")
 

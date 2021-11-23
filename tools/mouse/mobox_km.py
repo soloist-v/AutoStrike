@@ -25,7 +25,17 @@ class KM:
         pass
 
 
-km: KM = com.Dispatch("kmdll.KM")
+try:
+    km: KM = com.Dispatch("kmdll.KM")
+    STATE = km.OpenDevice
+    if STATE:
+        print("km connected.")
+    else:
+        print("km 未连接")
+except Exception as e:
+    print(e)
+    STATE = False
+    mk = None
 MOUSE_LEFT_KET_DOWN = 1
 MOUSE_LEFT_KEY_UP = 2
 MOUSE_RIGHT_KEY_DOWN = 3
@@ -259,12 +269,6 @@ def wait_mouse_right_press():
     """等待鼠标右键单击"""
     wait_key_press(VK_CODE["r_button"])
 
-
-STATE = km.OpenDevice
-if STATE:
-    print("km connected.")
-else:
-    print("km 未连接")
 
 if __name__ == '__main__':
     # mouse_right_press()

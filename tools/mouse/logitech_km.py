@@ -3,6 +3,7 @@ from ctypes import CDLL, c_int, c_int64
 import ctypes as ct
 from os import path
 from typing import Union
+from collections import defaultdict
 
 basedir = path.dirname(path.abspath(__file__))
 ghubdlldir = path.join(basedir, 'ghub_mouse.dll')
@@ -63,7 +64,14 @@ def mouse_left_press(interval: Union[int, float]):
     mouse_up()
 
 
-# ↑↑↑↑↑↑↑↑↑ 调用ghub/键鼠驱动 ↑↑↑↑↑↑↑↑↑
+def key_press(key_name: str, interval=0):
+    pass
+
+
+SK_CODE = defaultdict(int,
+                      **{
+                          'q': 81
+                      })
 
 """
 键盘按键和键盘对应代码表：
