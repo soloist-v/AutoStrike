@@ -5,7 +5,7 @@ from ctypes import c_uint8, sizeof, POINTER, cast, WinError
 from typing import Union, List
 import os
 import secrets
-from filelock import FileLock
+from .filelock import FileLock
 from multiprocessing.shared_memory import SharedMemory
 
 base_dir = os.path.abspath(os.path.dirname(__file__))
