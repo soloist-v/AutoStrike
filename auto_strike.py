@@ -115,30 +115,27 @@ class AutoStrike:
     def control_mouse(self, dx, dy, w, h, speed):
         # speed = ((2 / (self.s_width ** 2)) * (dx ** 2) + (2 / (self.s_height ** 2)) * dy ** 2) / 2
         # speed = (((dx / self.width) ** 2) + ((dy / self.height) ** 2)) * rate
-        ratio = ((w / self.s_width * self.ratio_w) + (h / self.s_height) * self.ratio_h) * 0.5
+        rate = ((w / self.s_width * self.ratio_w) + (h / self.s_height) * self.ratio_h) * 0.5
+        dx *= rate
+        dy *= rate
         dx = FOV(dx, self.side_len) / self.DPI_Var * 0.971
         dy = FOV(dy, self.side_len) / self.DPI_Var * 0.971
         src_x, src_y = dx, dy
         _m = max(abs(dx), abs(dy))
-        if _m < 5:
-            dx *= 0.05
-            dy *= 0.05
-            # dx, dy = calc_xy(dx, dy, 1)
-        elif _m < 10:
-            dx *= 0.1
-            dy *= 0.1
-            # dx, dy = calc_xy(dx, dy, 3)
-        elif _m < 20:
-            dx *= 0.2
-            dy *= 0.2
-            # dx, dy = calc_xy(dx, dy, 6)
-        elif _m < 40:
-            dx *= 0.4
-            dy *= 0.4
-            # dx, dy = calc_xy(dx, dy, 8)
+        if _m < 100:
+            speed *= _m / 100
+        elif _m < 200:
+            speed *= _m / 200
+        elif _m < 300:
+            speed *= _m / 300
+        elif _m < 400:
+            speed *= _m / 400
+        elif _m < 500:
+            speed *= _m / 500
         else:
-            dx = dx * speed * ratio
-            dy = dy * speed * ratio
+            speed *= _m * 2 / (self.s_height + self.s_width)
+        dx *= speed
+        dy *= speed
         print(src_x, src_y, dx, dy, _m)
         move_relative(dx, dy)
 
