@@ -119,9 +119,7 @@ class AutoStrike:
         dx = FOV(dx, self.side_len) / self.DPI_Var * 0.971
         dy = FOV(dy, self.side_len) / self.DPI_Var * 0.971
         _m = max(abs(dx), abs(dy))
-        if _m < 0:
-            dx, dy = calc_xy(dx, dy, 1)
-        elif _m < 5:
+        if _m < 5:
             dx, dy = calc_xy(dx, dy, 1)
         elif _m < 10:
             dx, dy = calc_xy(dx, dy, 5)
