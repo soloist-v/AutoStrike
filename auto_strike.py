@@ -152,7 +152,7 @@ class AutoStrike:
     def save_screen(self, x0, y0, w, h):
         img = grab_screen(x0, y0, w, h)
         n = dt.datetime.now()
-        cv2.imwrite(f"{n.year}-{n.month}-{n.day}_{n.hour}-{n.minute}-{n.second}.png", img)
+        cv2.imwrite(f"images/{n.year}-{n.month}-{n.day}_{n.hour}-{n.minute}-{n.second}.png", img)
 
     def get_best_object(self, boxes, scores, center):
         res = []
@@ -312,7 +312,7 @@ class AutoStrike:
 
 
 if __name__ == '__main__':
-    os.makedirs("logs", exist_ok=True)
+    os.makedirs("images", exist_ok=True)
     release_last_shm()  # 开始之前调用一下，防止之前异常推出后未释放共享内存
     if is_admin():
         num = input("选择模型: 1-yolov5n, 2-yolov5s ?").strip()

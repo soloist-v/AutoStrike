@@ -7,11 +7,14 @@ import numpy as np
 
 
 def test_img():
-    for path in walk_img("./images"):
+    for path in walk_img("./"):
+        print(path)
         img = cv2.imread(path)
+        if img is None:
+            continue
         img = auto_resize(img, 1600, 600)[0]
         h, w = img.shape[:2]
-        size = 320, 256
+        size = 256, 192
         x0 = (w - size[0]) // 2
         y0 = (h - size[1]) // 2
         x1 = x0 + size[0]
@@ -81,4 +84,4 @@ def test_sh_speed():
 
 
 if __name__ == '__main__':
-    test_sh_speed()
+    test_img()
