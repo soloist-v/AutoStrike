@@ -12,13 +12,15 @@ import numpy as np
 
 
 class ScreenShoot:
-    flag_set_xy = 0
-    flag_set_wh = 1
+    flag_set_xywh = 0
     # -----------------------------------------
     value_x = 0
     value_y = 1
     value_width = 2
     value_height = 3
+    # ------------------------------------------
+    SET_WH = 0b10000000
+    SET_XY = 0b01000000
 
     def __init__(self, x0, y0, width, height, channel=3, cache_size=10):
         self.x0 = x0
@@ -74,16 +76,31 @@ class ScreenShoot:
     def set_size(self, width, height):
         width = int(width)
         height = int(height)
-        self.values[0] = width
-        self.values[1] = height
-        self.flags[self.flag_set_wh] = True
+        self.values[self.value_width] = width
+        self.values[self.value_height] = height
+        self.flags[self.flag_set_xywh] |= self.SET_WH
 
     def set_xy(self, x0, y0):
         x0 = int(x0)
         y0 = int(y0)
         self.values[self.value_x] = x0
         self.values[self.value_y] = y0
-        self.flags[self.flag_set_xy] = True
+        self.flags[self.flag_set_xywh] |= self.SET_XY
+
+    def _set_state(self, win_capture):
+        if self.flags[self.flag_set_xywh]:
+            flag = self.flags[self.flag_set_xywh]
+            if flag & self.SET_WH:
+                w, h = self.values[self.value_width], self.values[self.value_height]
+                if w > self.width:
+                    warnings.warn("Width set failed, with > max_width")
+                if h > self.height:
+                    warnings.warn("Height set failed, height > max_height")
+                win_capture.set_size(w, h)
+            elif flag & self.SET_XY:
+                x, y = self.values[self.value_x], self.values[self.value_y]
+                win_capture.set_xy(x, y)
+            self.flags[self.flag_set_xywh] = False
 
     def run(self) -> None:
         x0 = self.x0
@@ -92,23 +109,9 @@ class ScreenShoot:
         height = self.height
         win_capture = WindowCaptureDll(x0, y0, width, height)
         frame_no = 0
-        flag_set_xy = self.flag_set_xy
-        flag_set_wh = self.flag_set_wh
-        flags = self.flags
         while True:
             # t0 = time.time()
-            if flags[flag_set_wh]:
-                w, h = self.values[self.value_width], self.values[self.value_height]
-                if w > width:
-                    warnings.warn("Width set failed, with > max_width")
-                if h > height:
-                    warnings.warn("Height set failed, height > max_height")
-                win_capture.set_size(w, h)
-                self.flags[self.flag_set_wh] = False
-            if flags[flag_set_xy]:
-                x, y = self.values[self.value_x], self.values[self.value_y]
-                win_capture.set_xy(x, y)
-                self.flags[self.flag_set_xy] = False
+            self._set_state(win_capture)
             frame = win_capture.frame_4()[:, :, :3]
             frame_no += 1
             self.set_frame(frame, frame_no)
@@ -140,23 +143,25 @@ class ScreenShootFast(ScreenShoot):
         height = self.height
         win_capture = WindowCaptureDll(x0, y0, width, height)
         frame_no = 0
-        flag_set_xy = self.flag_set_xy
-        flag_set_wh = self.flag_set_wh
+        flag_set_xywh = self.flag_set_xywh
         flags = self.flags
+        SET_WH = self.SET_WH
+        SET_XY = self.SET_XY
         while True:
             # t0 = time.time()
-            if flags[flag_set_wh]:
-                w, h = self.values[self.value_width], self.values[self.value_height]
-                if w > width:
-                    warnings.warn("Width set failed, with > max_width")
-                if h > height:
-                    warnings.warn("Height set failed, height > max_height")
-                win_capture.set_size(w, h)
-                self.flags[self.flag_set_wh] = False
-            if flags[flag_set_xy]:
-                x, y = self.values[self.value_x], self.values[self.value_y]
-                win_capture.set_xy(x, y)
-                self.flags[self.flag_set_xy] = False
+            if flags[flag_set_xywh]:
+                flag = flags[flag_set_xywh]
+                if flag & SET_WH:
+                    w, h = self.values[self.value_width], self.values[self.value_height]
+                    if w > width:
+                        warnings.warn("Width set failed, with > max_width")
+                    if h > height:
+                        warnings.warn("Height set failed, height > max_height")
+                    win_capture.set_size(w, h)
+                elif flag & SET_XY:
+                    x, y = self.values[self.value_x], self.values[self.value_y]
+                    win_capture.set_xy(x, y)
+                self.flags[flag_set_xywh] = False
             frame_no += 1
             p_buffer, next_idx = self.get_next_buffer()
             win_capture.frame4_to_buf(p_buffer)

@@ -165,8 +165,11 @@ class WindowCaptureDll:
         Gdi32.SelectObject(self.memdc, self.bmp)
 
     def set_size(self, width, height):
-        self.width = int(width)
-        self.height = int(height)
+        width, height = int(width), int(height)
+        if min(width, height) <= 0:
+            return
+        self.width = width
+        self.height = height
         self._bmi.bmiHeader.biWidth = width
         self._bmi.bmiHeader.biHeight = -height  # Why minus? [1]
         del self._data
