@@ -1,7 +1,6 @@
 import time
 import warnings
 from typing import Tuple, Union
-
 import cv2
 
 from .window_capture import WinCapture, WindowCaptureDll
@@ -31,7 +30,7 @@ class ScreenShoot:
         self.height = height
         self.flags = zeros(8)
         self.values = zeros(8, dtype=np.uint16)
-        self.is_start = False
+        self.pid = None
         self._frames = zeros((cache_size, height, width, channel), dtype=np.uint8)
         self._frame_no = zeros(1, dtype=np.uint)
         self._index = zeros(1, dtype=np.uint16)
@@ -116,10 +115,14 @@ class ScreenShoot:
             # print(time.time() - t0)
 
     def start(self):
-        if self.is_start:
+        if self.pid:
+            warnings.warn(f"Process {self.pid} is stared.", UserWarning)
             return
-        Process(target=self.run, daemon=True).start()
-        self.is_start = True
+        proc = Process(target=self.run, daemon=True)
+        proc.start()
+        while proc.pid is None: pass
+        print(f"screenshot server {proc.pid} is stared.")
+        self.pid = proc.pid
 
 
 class ScreenShootFast(ScreenShoot):

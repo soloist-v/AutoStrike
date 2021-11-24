@@ -83,5 +83,17 @@ def test_sh_speed():
     print(time.time() - t0)
 
 
+def test_pid():
+    from simple_pid import PID
+    pid = PID(0.2, 0, 0, setpoint=10)
+    pid.output_limits = (0, 10)
+    y = 10
+    for i in reversed(range(10)):
+        res = pid(y)
+        y += -res
+        print(y, res)
+        pid.setpoint = y
+
+
 if __name__ == '__main__':
-    test_img()
+    test_pid()
