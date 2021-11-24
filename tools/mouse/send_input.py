@@ -77,7 +77,7 @@ def mouse_left_press(interval: float):
     mouse_left_up()
 
 
-def key_press():
+def key_press(key_name: str, interval=0):
     pass
 
 
