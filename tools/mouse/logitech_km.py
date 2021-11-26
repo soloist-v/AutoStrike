@@ -1,15 +1,13 @@
 import time
-from ctypes import CDLL, c_int, c_int64
-import ctypes as ct
 from os import path
 from typing import Union
+from ..dll_meta import make_dll_meta
 from collections import defaultdict
 
-basedir = path.dirname(path.abspath(__file__))
-ghubdlldir = path.join(basedir, 'ghub_mouse.dll')
+base_dir = path.dirname(path.abspath(__file__))
 
 
-class GM:
+class GM(metaclass=make_dll_meta(path.join(base_dir, "ghub_mouse.dll"))):
 
     def Agulll(self) -> bool:
         return False
@@ -30,7 +28,7 @@ class GM:
         pass
 
 
-gm: GM = CDLL(ghubdlldir)
+gm: GM = GM()
 gmok = gm.Agulll()
 STATE = gmok
 
@@ -75,6 +73,7 @@ SK_CODE = defaultdict(int,
 
 if __name__ == '__main__':
     # mouse_scroll(10)
+    print(STATE)
     mouse_down(1)
     mouse_up()
     # mouse_xy(10, 10)

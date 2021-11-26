@@ -1,6 +1,8 @@
 import time
 
 import cv2
+from _ctypes import CFuncPtr
+
 from tools.image_tools import auto_resize, walk_img
 import onnxruntime
 import numpy as np
@@ -95,5 +97,15 @@ def test_pid():
         pid.setpoint = y
 
 
+def test_dll():
+    import ctypes as ct
+
+    dll = ct.CDLL(r"D:\Workspace\sendinput\cmake-build-debug\libsendinput.dll")
+    print(hasattr(dll, "SetProcessDpiAwareness"))
+    # print(isinstance(dll.SetProcessDpiAwareness, dll._FuncPtr))
+    # print(dir(dll))
+    # print(dll)
+
+
 if __name__ == '__main__':
-    test_pid()
+    test_dll()
