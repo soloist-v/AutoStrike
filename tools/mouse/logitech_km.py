@@ -1,79 +1,43 @@
 import time
 from os import path
-from typing import Union
 from ..dll_meta import make_dll_meta
-from collections import defaultdict
+from .send_input_dll import key_click
 
 base_dir = path.dirname(path.abspath(__file__))
 
+MOUSE_PRESS = 1
+MOUSE_RELEASE = 2
+MOUSE_MOVE = 3
+MOUSE_CLICK = 4
 
-class GM(metaclass=make_dll_meta(path.join(base_dir, "ghub_mouse.dll"))):
 
-    def Agulll(self) -> bool:
-        return False
+class LG(metaclass=make_dll_meta(path.join(base_dir, "LG_Mouse.dll"))):
 
-    def Mach_Move(self, x: int, y: int) -> int:
+    def mouse_open(self) -> bool:
         pass
 
-    def Leo_Kick(self, key: int) -> int:
+    def mouse_close(self):
         pass
 
-    def Niman_years(self) -> int:
+    def send_input(self, button: int, x: int, y: int, wheel: int):
         pass
 
-    def Mebiuspin(self, num: int) -> int:
+    def close(self):
+        self.mouse_close()
+
+    def is_open(self) -> bool:
         pass
 
-    def Shwaji(self) -> int:
-        pass
+
+lg = LG()
+STATE = lg.is_open()
 
 
-gm: GM = GM()
-gmok = gm.Agulll()
-STATE = gmok
-
-MOUSE_LEFT = 1
-MOUSE_RIGHT = 2
+def mouse_move_relative(dx: int, dy: int):
+    lg.send_input(MOUSE_MOVE, dx, dy, 0)
 
 
-def mouse_move_relative(dx, dy):
-    return gm.Mach_Move(int(dx), int(dy))
-
-
-def mouse_down(key=1):
-    return gm.Leo_Kick(int(key))
-
-
-def mouse_up():
-    return gm.Niman_years()
-
-
-def mouse_scroll(num=1):
-    return gm.Mebiuspin(int(num))
-
-
-def mouse_close():
-    return gm.Shwaji()
-
-
-def mouse_left_press(interval: Union[int, float]):
-    mouse_down(MOUSE_LEFT)
+def mouse_left_click(interval: float):
+    lg.send_input(MOUSE_PRESS, 0, 0, 0)
     time.sleep(interval)
-    mouse_up()
-
-
-def key_press(key_name: str, interval=0):
-    pass
-
-
-SK_CODE = defaultdict(int,
-                      **{
-                          'q': 81
-                      })
-
-if __name__ == '__main__':
-    # mouse_scroll(10)
-    print(STATE)
-    mouse_down(1)
-    mouse_up()
-    # mouse_xy(10, 10)
+    lg.send_input(MOUSE_RELEASE, 0, 0, 0)

@@ -9,7 +9,7 @@ from tools.prediction import Predictor
 from multiprocessing import Process
 from tools.shared import zeros, zeros_like
 from ctypes import c_float, c_int, c_bool
-from tools.mouse import move_relative, mouse_left_press, VK_CODE, get_key_state, key_press
+from tools.mouse import move_relative, mouse_left_click, VK_CODE, get_key_state, key_click
 from tools.screen_server import ScreenShoot, ScreenShootFast
 from tools.window_capture import WindowCaptureDll
 from tools.windows import find_window, get_screen_size, get_window_rect, grab_screen
@@ -237,12 +237,12 @@ class AutoStrike:
             # print("time:>>", (time.time() - t0))
 
     def switch_weapon(self):
-        key_press("q", 0.1)
+        key_click("q", 0.1)
         time.sleep(0.12)
-        key_press("q", 0.1)
+        key_click("q", 0.1)
 
     def fire(self):
-        mouse_left_press(0.1)
+        mouse_left_click(0.1)
 
     def control(self):
         sniper = False  # 狙击枪

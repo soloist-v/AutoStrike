@@ -7,14 +7,13 @@ from win32con import SPI_SETMOUSE, SPI_GETMOUSE, SPI_GETMOUSESPEED, SPI_SETMOUSE
 from .const import VK_CODE
 
 if mobox_km.STATE:
-    print(mobox_km.STATE)
-    from .mobox_km import mouse_move_relative, mouse_left_press, key_press
+    from .mobox_km import mouse_move_relative, mouse_left_click, key_click
 elif logitech_km.STATE:
-    from .logitech_km import mouse_move_relative, mouse_left_press, key_press
+    from .logitech_km import mouse_move_relative, mouse_left_click, key_click
 elif msdk.STATE:
-    from .msdk import mouse_move_relative, mouse_left_press, key_press
+    from .msdk import mouse_move_relative, mouse_left_click, key_click
 else:
-    from .send_input_dll import mouse_move_relative, mouse_left_press, key_press
+    from .send_input_dll import mouse_move_relative, mouse_left_click, key_click
 
 
 def move_relative(dx, dy):

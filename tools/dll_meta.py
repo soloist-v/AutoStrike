@@ -12,6 +12,11 @@ def make_dll_meta(dll_path):
                     continue
                 if hasattr(dll, f_name) and isinstance(getattr(dll, f_name), CFuncPtr):
                     setattr(cls, f_name, staticmethod(getattr(dll, f_name)))
+            cls.__dll = dll
             return cls
+
+        def close(cls):
+            if hasattr(cls, "close"):
+                cls.close(cls)
 
     return DllMeta

@@ -89,7 +89,7 @@ VK_CODE.update({_k.lower(): _v for _k, _v in VK_CODE.items()})
 VK_CODE.update({_k.upper(): _v for _k, _v in VK_CODE.items()})
 
 
-def key_press_code(key_code: int, interval=0):
+def key_click_code(key_code: int, interval=0):
     """
     键单击
     :param key_code: 键盘扫描码
@@ -101,7 +101,7 @@ def key_press_code(key_code: int, interval=0):
     km.key_eventCode(KEY_UP, key_code)
 
 
-def key_press(key_name: str, interval=0):
+def key_click(key_name: str, interval=0):
     """
     键单击
     :param key_name: 键名-->KEY_CODE.key
@@ -135,7 +135,7 @@ def mouse_left_key_up():
     km.mouse_event(MOUSE_LEFT_KEY_UP, 0, 0)
 
 
-def mouse_left_press(interval=0.):
+def mouse_left_click(interval=0.):
     """鼠标左键单击"""
     mouse_left_key_down()
     time.sleep(interval)
@@ -152,7 +152,7 @@ def mouse_right_key_up():
     km.mouse_event(MOUSE_RIGHT_KEY_UP, 0, 0)
 
 
-def mouse_right_press(interval=0.):
+def mouse_right_click(interval=0.):
     """鼠标右键单击"""
     mouse_right_key_down()
     time.sleep(interval)
@@ -169,7 +169,7 @@ def mouse_middle_key_up():
     km.mouse_event(MOUSE_MIDDLE_KEY_UP, 0, 0)
 
 
-def mouse_middle_press(interval):
+def mouse_middle_click(interval):
     """鼠标中键单击"""
     mouse_middle_key_down()
     time.sleep(interval)
@@ -235,7 +235,7 @@ def wait_key_up(key: int):
         time.sleep(0.)
 
 
-def wait_key_press(key: int):
+def wait_key_click(key: int):
     """等待键单击"""
     wait_key_down(key)
     wait_key_up(key)
@@ -251,9 +251,9 @@ def wait_mouse_left_up():
     wait_key_up(VK_CODE["l_button"])
 
 
-def wait_mouse_left_press():
+def wait_mouse_left_click():
     """等待鼠标左键单击"""
-    wait_key_press(VK_CODE["l_button"])
+    wait_key_click(VK_CODE["l_button"])
 
 
 def wait_mouse_right_down():
@@ -266,19 +266,19 @@ def wait_mouse_right_up():
     wait_key_up(VK_CODE["r_button"])
 
 
-def wait_mouse_right_press():
+def wait_mouse_right_click():
     """等待鼠标右键单击"""
-    wait_key_press(VK_CODE["r_button"])
+    wait_key_click(VK_CODE["r_button"])
 
 
 if __name__ == '__main__':
-    # mouse_right_press()
-    mouse_left_press(0.06)
+    # mouse_right_click()
+    mouse_left_click(0.06)
     # mouse_all_key_up()
-    # wait_key_press(VK_CODE["Esc"])
+    # wait_key_click(VK_CODE["Esc"])
     # wait_key_down(VK_CODE["m_button"])
     # mouse_move_absolute(800, 800)
     # mouse_move_smooth_abs(500, 500)
     # print(KEY_CODE)
-    # key_press_code(4)
-    # key_press("Win")
+    # key_click_code(4)
+    # key_click("Win")

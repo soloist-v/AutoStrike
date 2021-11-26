@@ -1,3 +1,4 @@
+import os
 import time
 
 import cv2
@@ -6,6 +7,8 @@ from _ctypes import CFuncPtr
 from tools.image_tools import auto_resize, walk_img
 import onnxruntime
 import numpy as np
+
+from tools.utils import set_dpi
 
 
 def test_img():
@@ -99,20 +102,35 @@ def test_pid():
 
 def test_dll():
     import ctypes as ct
-
-    dll = ct.CDLL(r"D:\Workspace\sendinput\cmake-build-debug\libsendinput.dll")
-    print(hasattr(dll, "SetProcessDpiAwareness"))
-    # print(isinstance(dll.SetProcessDpiAwareness, dll._FuncPtr))
-    # print(dir(dll))
-    # print(dll)
+    # os.chdir(r'D:\Workspace\sendinput\cmake-build-debug')
+    dll = ct.windll.LoadLibrary(r"tools/mouse/libsendinput.dll")
+    # ret = dll.mouse_open()
+    # print(ret)
 
 
 def test_send_input_dll():
     from tools.mouse.send_input_dll import send_input, VK_CODE
-    # send_input.key_press(VK_CODE['q'], 500)
-    # send_input.move_absolute(838, 444)
-    send_input.move_relative(20, 30)
+    send_input.key_click(VK_CODE['q'], 500)
+    set_dpi()
+    # send_input.move_absolute(960, 540)
+    # send_input.move_relative(20, 30)
+    # send_input.mouse_left_down()
+    # send_input.mouse_left_up()
+
+    # send_input.mouse_right_down()
+    # send_input.mouse_right_up()
+
+
+def test_lg_mouse():
+    from tools.mouse.logitech_km import mouse_left_click, key_click
+    from tools.mouse import VK_CODE
+    mouse_left_click(0.01)
+    key_click("q")
 
 
 if __name__ == '__main__':
-    test_send_input_dll()
+    import ctypes as ct
+
+    # test_dll()
+    test_lg_mouse()
+    # test_send_input_dll()

@@ -86,14 +86,24 @@ def key_up(key=69):
     return M_KeyUp2(msdk_hdl, key)
 
 
-def mouse_left_press(interval: Union[int, float]):
+def mouse_left_click(interval: Union[int, float]):
     mouse_down(1)
     time.sleep(interval)
     mouse_up()
 
 
-def key_press(key_name: str, interval=0):
-    pass
+KEY_CODE = {
+    "Q": 81,
+}
+KEY_CODE.update({_k.lower(): _v for _k, _v in VK_CODE.items()})
+KEY_CODE.update({_k.upper(): _v for _k, _v in VK_CODE.items()})
+
+
+def key_click(key_name: str, interval=0):
+    code = KEY_CODE[key_name]
+    key_down(code)
+    time.sleep(interval)
+    key_up(code)
 
 
 """
