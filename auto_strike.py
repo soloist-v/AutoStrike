@@ -141,7 +141,7 @@ class AutoStrike:
         # self.update_win_state()
         self.screenShoot = ScreenShootFast(self.x0, self.y0, self.width, self.height)
         self.screenShoot.start()
-        self.move_func, self.key_click, self.mouse_left_click = select_device(device)
+        self.move_func, self.mouse_left_click, self.key_click = select_device(device)
 
     def get_game_info(self):
         set_dpi()
