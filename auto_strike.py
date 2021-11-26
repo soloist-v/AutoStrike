@@ -5,11 +5,13 @@ import warnings
 import cv2
 import numpy as np
 import datetime as dt
+import win32gui
+from win32con import SPI_SETMOUSE, SPI_GETMOUSE, SPI_GETMOUSESPEED, SPI_SETMOUSESPEED
 from tools.prediction import Predictor
 from multiprocessing import Process
 from tools.shared import zeros, zeros_like
 from ctypes import c_float, c_int, c_bool
-from tools.mouse import move_relative, mouse_left_click, VK_CODE, get_key_state, key_click
+from tools.mouse.const import VK_CODE, get_key_state
 from tools.screen_server import ScreenShoot, ScreenShootFast
 from tools.window_capture import WindowCaptureDll
 from tools.windows import find_window, get_screen_size, get_window_rect, grab_screen
@@ -68,11 +70,53 @@ def calc_xy(dx, dy, max_val):
     return dx, dy
 
 
+DEVICE_WIN_API = 0
+DEVICE_LG = 1
+DEVICE_MSDK = 2
+DEVICE_MO_BOX = 3
+DEVICE_DD = 4
+
+
+def move_relative(dx, dy, mouse_move_relative):
+    enhanced_holdback = win32gui.SystemParametersInfo(SPI_GETMOUSE)
+    if enhanced_holdback[1]:
+        win32gui.SystemParametersInfo(SPI_SETMOUSE, [0, 0, 0], 0)
+    mouse_speed = win32gui.SystemParametersInfo(SPI_GETMOUSESPEED)
+    if mouse_speed != 10:
+        win32gui.SystemParametersInfo(SPI_SETMOUSESPEED, 10, 0)
+
+    mouse_move_relative(round(dx), round(dy))
+
+    if enhanced_holdback[1]:
+        win32gui.SystemParametersInfo(SPI_SETMOUSE, enhanced_holdback, 0)
+    if mouse_speed != 10:
+        win32gui.SystemParametersInfo(SPI_SETMOUSESPEED, mouse_speed, 0)
+
+
+def select_device(device):
+    if device == DEVICE_WIN_API:
+        from tools.mouse.send_input_dll import mouse_move_relative, mouse_left_click, key_click
+        print("device: send_input_dll")
+    elif device == DEVICE_LG:
+        from tools.mouse.logitech_km import mouse_move_relative, mouse_left_click, key_click
+        print("device: logitech_km")
+    elif device == DEVICE_MSDK:
+        from tools.mouse.msdk import mouse_move_relative, mouse_left_click, key_click
+        print("device: msdk")
+    elif device == DEVICE_MO_BOX:
+        from tools.mouse.mobox_km import mouse_move_relative, mouse_left_click, key_click
+        print("device: mobox_km")
+    else:
+        from tools.mouse.auto_import import mouse_move_relative, mouse_left_click, key_click
+    return move_relative, mouse_left_click, key_click
+
+
 class AutoStrike:
     flag_is_update_state = 0
     flag_is_run = 1
+    flag_device = 2
 
-    def __init__(self, path: str, win_size=(256, 192), window_name="CrossFire", ):
+    def __init__(self, path: str, win_size=(256, 192), window_name="CrossFire", device=None):
         self.window_name = window_name
         self._proc = None
         self.daemon = True
@@ -85,7 +129,7 @@ class AutoStrike:
         self.x_center, self.y_center = self.s_width // 2, self.s_height // 2
         self.center = self.x_center, self.y_center
         self.target_coord = ShareCoord()
-        self._flags = zeros(2, dtype="uint8")
+        self._flags = zeros(4, dtype="uint8")
         self.counter = 0
         self.rate = 0.5
         self.window_hwnd = None
@@ -97,6 +141,7 @@ class AutoStrike:
         # self.update_win_state()
         self.screenShoot = ScreenShootFast(self.x0, self.y0, self.width, self.height)
         self.screenShoot.start()
+        self.move_func, self.key_click, self.mouse_left_click = select_device(device)
 
     def get_game_info(self):
         set_dpi()
@@ -125,7 +170,7 @@ class AutoStrike:
         dx *= rate * speed
         dy *= rate * speed
         print(src_x, src_y, dx, dy, _m)
-        move_relative(dx, dy)
+        move_relative(dx, dy, self.move_func)
 
     def update_win_state(self):
         print("更新窗口信息")
@@ -176,6 +221,14 @@ class AutoStrike:
     @property
     def is_update_state(self):
         return self._flags[self.flag_is_update_state]
+
+    @property
+    def device(self):
+        return self._flags[self.flag_device]
+
+    @device.setter
+    def device(self, val):
+        self._flags[self.flag_device] = val
 
     @is_update_state.setter
     def is_update_state(self, val):
@@ -237,12 +290,12 @@ class AutoStrike:
             # print("time:>>", (time.time() - t0))
 
     def switch_weapon(self):
-        key_click("q", 0.1)
+        self.key_click("q", 0.1)
         time.sleep(0.12)
-        key_click("q", 0.1)
+        self.key_click("q", 0.1)
 
     def fire(self):
-        mouse_left_click(0.1)
+        self.mouse_left_click(0.1)
 
     def control(self):
         sniper = False  # 狙击枪
@@ -315,9 +368,11 @@ if __name__ == '__main__':
     os.makedirs("images", exist_ok=True)
     release_last_shm()  # 开始之前调用一下，防止之前异常推出后未释放共享内存
     if is_admin():
-        num = input("选择模型: 1-yolov5n, 2-yolov5s ?").strip()
+        device = input("选择设备: 0-SendInput, 1-罗技, 2-幽灵键鼠, 3-mo_box, 默认-自动选择?\n").strip()
+        device = int(device) if device.isdigit() else None
+        num = input("选择模型: 1-yolov5n, 2-yolov5s ?\n").strip()
         version = {"1": "n", "2": "s"}.get(num) or "n"
-        app = AutoStrike(f"weights/yolov5{version}.pt", win_size=(256, 192))
+        app = AutoStrike(f"weights/yolov5{version}.pt", win_size=(256, 192), device=device)
         app.start()
         app.control()
         cv2.destroyAllWindows()

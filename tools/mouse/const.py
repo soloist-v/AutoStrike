@@ -1,3 +1,4 @@
+from win32api import GetAsyncKeyState
 
 VK_CODE = {
     "A": 0x41, "B": 0x42, "C": 0x43, "D": 0x44, "E": 0x45, "F": 0x46, "G": 0x47, "H": 0x48, "I": 0x49, "J": 0x4A,
@@ -18,3 +19,4 @@ VK_CODE = {
 VK_CODE.update({_k.lower(): _v for _k, _v in VK_CODE.items()})
 VK_CODE.update({_k.upper(): _v for _k, _v in VK_CODE.items()})
 
+get_key_state = lambda key: GetAsyncKeyState(key) & 0x8000
