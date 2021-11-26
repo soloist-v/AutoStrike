@@ -161,7 +161,7 @@ class AutoStrike:
         rate = ((w / self.s_width * self.ratio_w) + (h / self.s_height) * self.ratio_h) * 0.5
         dx = FOV(dx, self.side_len) / self.DPI_Var * 0.971
         dy = FOV(dy, self.side_len) / self.DPI_Var * 0.971
-        src_x, src_y = dx, dy
+        # src_x, src_y = dx, dy
         _m = max(abs(dx), abs(dy))
         for i in range(100, self.s_width, 100):
             if _m < i:
@@ -169,7 +169,7 @@ class AutoStrike:
                 break
         dx *= rate * speed
         dy *= rate * speed
-        print(src_x, src_y, dx, dy, _m)
+        # print(src_x, src_y, dx, dy, _m)
         move_relative(dx, dy, self.move_func)
 
     def update_win_state(self):
@@ -210,8 +210,8 @@ class AutoStrike:
             y2 += self.y0
             w, h = x2 - x1, y2 - y1
             x, y = (x1 + x2) // 2, (y1 + y2) // 2  # int(y1 + h * self.rate)
-            # dist = math.dist((x, y), center)
-            dist = abs(x - c_x) + abs(y - c_y)
+            dist = math.dist((x, y), center)
+            # dist = abs(x - c_x) + abs(y - c_y)
             # dist = (math.sqrt(w * h) / dist if dist else 999)
             res.append((dist, x, y, w, h))
         res.sort(key=lambda x: x[0])
@@ -347,14 +347,14 @@ class AutoStrike:
                 if abs(dx) <= 1 / 4 * w and abs(dy) <= 2 / 5 * h:  # 查看是否已经指向目标
                     # self.fire()
                     continue
-                self.control_mouse(dx, dy - h * 0.37, w, h, 1)
+                self.control_mouse(dx, dy - h * 0.37, w, h, 0.5)
             if get_key_state(key_r_button):  # 鼠标右键
                 if abs(dx) <= 1 / 5 * w and abs(dy) <= 1 / 5 * h:  # 查看是否已经指向目标
                     self.fire()
                     if sniper:
                         self.switch_weapon()
                     continue
-                self.control_mouse(dx, dy, w, h, 0.5)
+                self.control_mouse(dx, dy, w, h, 0.3)
 
     def start(self):
         if self._proc is not None:
