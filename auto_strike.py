@@ -77,7 +77,7 @@ DEVICE_MO_BOX = 3
 DEVICE_DD = 4
 
 
-def move_relative(dx, dy, mouse_move_relative):
+def move_relative(dx, dy, move_func):
     enhanced_holdback = win32gui.SystemParametersInfo(SPI_GETMOUSE)
     if enhanced_holdback[1]:
         win32gui.SystemParametersInfo(SPI_SETMOUSE, [0, 0, 0], 0)
@@ -85,7 +85,7 @@ def move_relative(dx, dy, mouse_move_relative):
     if mouse_speed != 10:
         win32gui.SystemParametersInfo(SPI_SETMOUSESPEED, 10, 0)
 
-    mouse_move_relative(round(dx), round(dy))
+    move_func(round(dx), round(dy))
 
     if enhanced_holdback[1]:
         win32gui.SystemParametersInfo(SPI_SETMOUSE, enhanced_holdback, 0)
@@ -108,7 +108,7 @@ def select_device(device):
         print("device: mobox_km")
     else:
         from tools.mouse.auto_import import mouse_move_relative, mouse_left_click, key_click
-    return move_relative, mouse_left_click, key_click
+    return mouse_move_relative, mouse_left_click, key_click
 
 
 class AutoStrike:
