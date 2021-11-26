@@ -2,7 +2,7 @@ import time
 from ctypes import CDLL, c_int, c_int64
 from os import path
 from typing import Union
-from collections import defaultdict
+from .const import VK_CODE
 
 basedir = path.dirname(path.abspath(__file__))
 msdkdlldir = path.join(basedir, 'msdk.dll')
@@ -95,11 +95,6 @@ def mouse_left_press(interval: Union[int, float]):
 def key_press(key_name: str, interval=0):
     pass
 
-
-SK_CODE = defaultdict(int,
-                      **{
-                          'q': 81
-                      })
 
 """
 键盘按键和键盘对应代码表：

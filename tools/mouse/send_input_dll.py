@@ -5,7 +5,7 @@ from .const import VK_CODE
 from ..dll_meta import make_dll_meta
 
 base_dir = os.path.dirname(os.path.abspath(__file__))
-DLL = os.path.join(base_dir, "sendinput.dll")
+DLL = os.path.join(base_dir, "libsendinput.dll")
 
 
 class SendInputDll(metaclass=make_dll_meta(DLL)):

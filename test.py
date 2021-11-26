@@ -107,5 +107,12 @@ def test_dll():
     # print(dll)
 
 
+def test_send_input_dll():
+    from tools.mouse.send_input_dll import send_input, VK_CODE
+    # send_input.key_press(VK_CODE['q'], 500)
+    # send_input.move_absolute(838, 444)
+    send_input.move_relative(20, 30)
+
+
 if __name__ == '__main__':
-    test_dll()
+    test_send_input_dll()
