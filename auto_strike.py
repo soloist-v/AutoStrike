@@ -15,7 +15,7 @@ from tools.mouse.const import VK_CODE, get_key_state
 from tools.screen_server import ScreenShoot, ScreenShootFast
 from tools.window_capture import WindowCaptureDll
 from tools.windows import find_window, get_screen_size, get_window_rect, grab_screen
-from tools.utils import set_dpi, FOV, is_admin, set_high_priority
+from tools.utils import set_dpi, FOV, is_admin, set_high_priority, restart
 from tools.shared import release_last_shm
 import ctypes as ct
 import math
@@ -108,6 +108,8 @@ def select_device(device):
         print("device: mobox_km")
     else:
         from tools.mouse.auto_import import mouse_move_relative, mouse_left_click, key_click
+        print("device: auto_choose")
+    print("move function:", mouse_move_relative)
     return mouse_move_relative, mouse_left_click, key_click
 
 
@@ -368,9 +370,10 @@ if __name__ == '__main__':
     os.makedirs("images", exist_ok=True)
     release_last_shm()  # 开始之前调用一下，防止之前异常推出后未释放共享内存
     if is_admin():
-        device = input("选择设备: 0-WinApi_SendInput, 1-罗技_GHUB, 2-飞易来, 3-MO_BOX, 默认-自动选择?\n").strip()
+        device = input(
+            "选择设备:\n\t0----WinApi_SendInput\n\t1----罗技_GHUB\n\t2----飞易来\n\t3----MO_BOX\n\t默认自动选择\n\t").strip()
         device = int(device) if device.isdigit() else None
-        num = input("选择模型: 1-yolov5n, 2-yolov5s ?\n").strip()
+        num = input("选择模型:\n\t1----yolov5n\n\t2-----yolov5s ?\n").strip()
         version = {"1": "n", "2": "s"}.get(num) or "n"
         app = AutoStrike(f"weights/yolov5{version}.pt", win_size=(256, 192), device=device)
         app.start()
@@ -378,4 +381,5 @@ if __name__ == '__main__':
         cv2.destroyAllWindows()
     else:
         print("请以管理员权限启动程序.")
+        restart(__file__)
     release_last_shm()
