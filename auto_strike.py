@@ -212,9 +212,9 @@ class AutoStrike:
             y2 += self.y0
             w, h = x2 - x1, y2 - y1
             x, y = (x1 + x2) // 2, (y1 + y2) // 2  # int(y1 + h * self.rate)
-            dist = math.dist((x, y), center)
-            # dist = abs(x - c_x) + abs(y - c_y)
-            # dist = (math.sqrt(w * h) / dist if dist else 999)
+            # dist = math.dist((x, y), center)
+            dist = abs(x - c_x) + abs(y - c_y)
+            dist = (math.sqrt(w * h) / dist if dist else 999)
             res.append((dist, x, y, w, h))
         res.sort(key=lambda x: x[0])
         res = res[-1]
