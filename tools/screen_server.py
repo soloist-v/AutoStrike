@@ -5,6 +5,7 @@ import cv2
 
 from .window_capture import WinCapture, WindowCaptureDll
 from .shared import zeros, full, Value
+from .utils import set_high_priority
 from multiprocessing import Process
 from ctypes import c_char_p
 from numpy import ndarray
@@ -103,6 +104,7 @@ class ScreenShoot:
             self.flags[self.flag_set_xywh] = False
 
     def run(self) -> None:
+        set_high_priority()
         x0 = self.x0
         y0 = self.y0
         width = self.width
@@ -137,6 +139,7 @@ class ScreenShootFast(ScreenShoot):
         return cv2.cvtColor(super().frame(), cv2.COLOR_BGRA2BGR)
 
     def run(self) -> None:
+        set_high_priority()
         x0 = self.x0
         y0 = self.y0
         width = self.width

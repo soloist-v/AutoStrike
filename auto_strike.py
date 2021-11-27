@@ -137,7 +137,7 @@ class AutoStrike:
         self.window_hwnd = None
         self.client_ratio = self.s_width / self.s_height
         self.DPI_Var = 1
-        self.side_len = 600
+        self.side_len = self.get_side_len()
         self.ratio_w = self.s_width / self.width
         self.ratio_h = self.s_height / self.height
         # self.update_win_state()
@@ -161,16 +161,19 @@ class AutoStrike:
 
     def control_mouse(self, dx, dy, w, h, speed):
         rate = ((w / self.s_width * self.ratio_w) + (h / self.s_height) * self.ratio_h) * 0.5
-        dx = FOV(dx, self.side_len) / self.DPI_Var * 0.971
-        dy = FOV(dy, self.side_len) / self.DPI_Var * 0.971
+        dx = FOV(dx, self.side_len[0]) / self.DPI_Var * 0.971
+        dy = FOV(dy, self.side_len[1]) / self.DPI_Var * 0.971
         # src_x, src_y = dx, dy
         _m = max(abs(dx), abs(dy))
         for i in range(100, self.s_width, 100):
             if _m < i:
                 speed *= _m / i
                 break
-        dx *= rate * speed
-        dy *= rate * speed
+        if _m < 2:
+            pass
+        else:
+            dx *= rate * speed
+            dy *= rate * speed
         # print(src_x, src_y, dx, dy, _m)
         move_relative(dx, dy, self.move_func)
 
@@ -245,7 +248,7 @@ class AutoStrike:
         self._flags[self.flag_is_run] = val
 
     def get_side_len(self):
-        return int(self.s_height * (2 / 3))
+        return int(self.s_width * (2 / 3)), int(self.s_height * (2 / 3))
 
     def run(self):
         if self.screenShoot is None:
@@ -253,7 +256,7 @@ class AutoStrike:
             self.screenShoot = cap
         else:
             cap = self.screenShoot
-        predictor = Predictor(self.path, "cuda:0", imgsz=(self.width, self.height), conf_thres=0.4)
+        predictor = Predictor(self.path, "cuda:0", imgsz=(self.width, self.height), conf_thres=0.2)
         print("""
         启动完毕
         按键说明:
@@ -272,7 +275,7 @@ class AutoStrike:
         -------------------
         tip: 左键按下就会自动瞄准，松开停止，右键按下就会自动瞄准和自动开火(狙击开镜使用最好)，松开停止.
         """)
-        # set_high_priority()
+        set_high_priority()
         while True:
             # t0 = time.time()
             if self.is_update_state:
@@ -346,12 +349,12 @@ class AutoStrike:
             dx = (x - self.x_center)
             dy = (y - self.y_center)
             if get_key_state(key_l_button):  # 鼠标左键
-                if abs(dx) <= 1 / 4 * w and abs(dy) <= 2 / 5 * h:  # 查看是否已经指向目标
+                if abs(dx) <= max(1 / 4 * w, 4) and abs(dy) <= max(2 / 5 * h, 4):  # 查看是否已经指向目标
                     # self.fire()
                     continue
                 self.control_mouse(dx, dy - h * 0.37, w, h, 0.5)
             if get_key_state(key_r_button):  # 鼠标右键
-                if abs(dx) <= 1 / 5 * w and abs(dy) <= 1 / 5 * h:  # 查看是否已经指向目标
+                if abs(dx) <= 1 / 4 * w and abs(dy) <= 2 / 5 * h:  # 查看是否已经指向目标
                     self.fire()
                     if sniper:
                         self.switch_weapon()
@@ -375,7 +378,7 @@ def main():
         device = int(device) if device.isdigit() else None
         num = input("选择模型:\n\t1----yolov5n\n\t2-----yolov5s ?\n").strip()
         version = {"1": "n", "2": "s"}.get(num) or "n"
-        app = AutoStrike(f"weights/yolov5{version}.pt", win_size=(256, 192), device=device)
+        app = AutoStrike(f"weights/yolov5{version}.pt", win_size=(256, 256), device=device)
         app.start()
         app.control()
         cv2.destroyAllWindows()
