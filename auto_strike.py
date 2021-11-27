@@ -366,7 +366,7 @@ class AutoStrike:
         self._proc.start()
 
 
-if __name__ == '__main__':
+def main():
     os.makedirs("images", exist_ok=True)
     release_last_shm()  # 开始之前调用一下，防止之前异常推出后未释放共享内存
     if is_admin():
@@ -383,3 +383,7 @@ if __name__ == '__main__':
         print("请以管理员权限启动程序.")
         restart(__file__)
     release_last_shm()
+
+
+if __name__ == '__main__':
+    main()
