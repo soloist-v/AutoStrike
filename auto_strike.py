@@ -368,7 +368,7 @@ if __name__ == '__main__':
     os.makedirs("images", exist_ok=True)
     release_last_shm()  # 开始之前调用一下，防止之前异常推出后未释放共享内存
     if is_admin():
-        device = input("选择设备: 0-SendInput, 1-罗技, 2-幽灵键鼠, 3-mo_box, 默认-自动选择?\n").strip()
+        device = input("选择设备: 0-WinApi_SendInput, 1-罗技_GHUB, 2-飞易来, 3-MO_BOX, 默认-自动选择?\n").strip()
         device = int(device) if device.isdigit() else None
         num = input("选择模型: 1-yolov5n, 2-yolov5s ?\n").strip()
         version = {"1": "n", "2": "s"}.get(num) or "n"
