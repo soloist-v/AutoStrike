@@ -378,7 +378,7 @@ def main():
         device = int(device) if device.isdigit() else None
         num = input("选择模型:\n\t1----yolov5n\n\t2-----yolov5s ?\n").strip()
         version = {"1": "n", "2": "s"}.get(num) or "n"
-        app = AutoStrike(f"weights/yolov5{version}.pt", win_size=(256, 256), device=device)
+        app = AutoStrike(f"weights/yolov5{version}.pt", win_size=(256, 192), device=device)
         app.start()
         app.control()
         cv2.destroyAllWindows()

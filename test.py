@@ -122,10 +122,11 @@ def test_send_input_dll():
 
 
 def test_lg_mouse():
-    from tools.mouse.logitech_km import mouse_left_click, key_click
-    from tools.mouse import VK_CODE
-    mouse_left_click(0.01)
-    key_click("q")
+    from tools.mouse.logitech_km import mouse_left_click, key_click, mouse_move_relative
+    from tools.mouse.const import VK_CODE
+    # mouse_left_click(0.01)
+    mouse_move_relative(10, 20)
+    # key_click("q")
 
 
 if __name__ == '__main__':

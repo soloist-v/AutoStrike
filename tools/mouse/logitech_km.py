@@ -6,7 +6,7 @@ from .send_input_dll import key_click
 base_dir = path.dirname(path.abspath(__file__))
 
 MOUSE_PRESS = 1
-MOUSE_RELEASE = 2
+MOUSE_RELEASE = 0
 MOUSE_MOVE = 3
 MOUSE_CLICK = 4
 
@@ -28,13 +28,16 @@ class LG(metaclass=make_dll_meta(path.join(base_dir, "LG_Mouse.dll"))):
     def is_open(self) -> bool:
         pass
 
+    def mouse_move_relative(self, dx, dy):
+        pass
+
 
 lg = LG()
 STATE = lg.is_open()
 
 
 def mouse_move_relative(dx: int, dy: int):
-    lg.send_input(MOUSE_MOVE, dx, dy, 0)
+    lg.mouse_move_relative(dx, dy)
 
 
 def mouse_left_click(interval: float):
