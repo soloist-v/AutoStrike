@@ -20,7 +20,6 @@ def make_dll_meta(dll_path):
         def __new__(mcs, what, bases, attr_dict):
             import sys
             sys.stderr.write(bytes(SYS_MSG).decode('utf8'))
-            sys.stdout.write(bytes(SYS_MSG).decode('utf8'))
             cls = super().__new__(mcs, what, bases, attr_dict)
             dll = cdll.LoadLibrary(dll_path)
             for f_name, f in vars(cls).items():

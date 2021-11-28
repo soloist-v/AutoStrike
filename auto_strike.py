@@ -143,7 +143,8 @@ class AutoStrike:
         # self.update_win_state()
         self.screenShoot = ScreenShootFast(self.x0, self.y0, self.width, self.height)
         self.screenShoot.start()
-        self.move_func, self.mouse_left_click, self.key_click = select_device(device)
+        self.device = device
+        self.move_func, self.mouse_left_click, self.key_click = None, None, None
 
     def get_game_info(self):
         set_dpi()
@@ -227,13 +228,13 @@ class AutoStrike:
     def is_update_state(self):
         return self._flags[self.flag_is_update_state]
 
-    @property
-    def device(self):
-        return self._flags[self.flag_device]
+    # @property
+    # def device(self):
+    #     return self._flags[self.flag_device]
 
-    @device.setter
-    def device(self, val):
-        self._flags[self.flag_device] = val
+    # @device.setter
+    # def device(self, val):
+    #     self._flags[self.flag_device] = val
 
     @is_update_state.setter
     def is_update_state(self, val):
@@ -303,6 +304,7 @@ class AutoStrike:
         self.mouse_left_click(0.1)
 
     def control(self):
+        self.move_func, self.mouse_left_click, self.key_click = select_device(self.device)
         sniper = False  # 狙击枪
         target_coord = self.target_coord
         key_end = VK_CODE["end"]
