@@ -161,20 +161,20 @@ class AutoStrike:
         return x0, y0, x1, y1, hw
 
     def control_mouse(self, dx, dy, w, h, speed):
-        rate = ((w / self.s_width * self.ratio_w) + (h / self.s_height) * self.ratio_h) * 0.5
-        dx = FOV(dx, self.side_len[0]) / self.DPI_Var * 0.971
-        dy = FOV(dy, self.side_len[1]) / self.DPI_Var * 0.971
-        # src_x, src_y = dx, dy
-        _m = max(abs(dx), abs(dy))
-        for i in range(100, self.s_width, 100):
-            if _m < i:
-                speed *= _m / i
-                break
-        if _m < 2:
-            pass
-        else:
-            dx *= rate * speed
-            dy *= rate * speed
+        # rate = ((w / self.s_width * self.ratio_w) + (h / self.s_height) * self.ratio_h) * 0.5
+        # dx = FOV(dx, self.side_len[0]) / self.DPI_Var * 0.971
+        # dy = FOV(dy, self.side_len[1]) / self.DPI_Var * 0.971
+        # # src_x, src_y = dx, dy
+        # _m = max(abs(dx), abs(dy))
+        # for i in range(100, self.s_width, 100):
+        #     if _m < i:
+        #         speed *= _m / i
+        #         break
+        # if _m < 2:
+        #     pass
+        # else:
+        #     dx *= rate * speed
+        #     dy *= rate * speed
         # print(src_x, src_y, dx, dy, _m)
         move_relative(dx, dy, self.move_func)
 
@@ -354,14 +354,14 @@ class AutoStrike:
                 if abs(dx) <= max(1 / 4 * w, 4) and abs(dy) <= max(2 / 5 * h, 4):  # 查看是否已经指向目标
                     # self.fire()
                     continue
-                self.control_mouse(dx, dy - h * 0.37, w, h, 0.5)
+                self.control_mouse(dx, dy - h * 0.37, w, h, 0.1)
             if get_key_state(key_r_button):  # 鼠标右键
                 if abs(dx) <= 1 / 4 * w and abs(dy) <= 2 / 5 * h:  # 查看是否已经指向目标
                     self.fire()
                     if sniper:
                         self.switch_weapon()
                     continue
-                self.control_mouse(dx, dy, w, h, 0.3)
+                self.control_mouse(dx, dy, w, h, 0.1)
 
     def start(self):
         if self._proc is not None:
