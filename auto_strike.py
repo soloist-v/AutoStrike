@@ -176,7 +176,7 @@ class AutoStrike:
         #     dx *= rate * speed
         #     dy *= rate * speed
         # print(src_x, src_y, dx, dy, _m)
-        move_relative(dx, dy, self.move_func)
+        move_relative(dx * speed, dy * speed, self.move_func)
 
     def update_win_state(self):
         print("更新窗口信息")
