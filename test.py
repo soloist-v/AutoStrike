@@ -1,18 +1,21 @@
 import os
+import sys
 import time
-
 import cv2
-from _ctypes import CFuncPtr
-
+import torch
+from torch.nn import Module
+from torch.optim import Adam
+from torch.utils.data import DataLoader, Dataset, RandomSampler
 from tools.image_tools import auto_resize, walk_img
 import onnxruntime
 import numpy as np
-
 from tools.utils import set_dpi
 
 
 def test_img():
-    for path in walk_img("./"):
+    from tools.prediction import Predictor
+    predictor = Predictor("weights/yolov5s.pt", "cuda:0", imgsz=(640, 640), conf_thres=0.3)
+    for path in walk_img("./images"):
         print(path)
         img = cv2.imread(path)
         if img is None:
@@ -24,13 +27,25 @@ def test_img():
         y0 = (h - size[1]) // 2
         x1 = x0 + size[0]
         y1 = y0 + size[1]
-        print("x,y", x0, y0)
+        s_cx = w // 2
+        s_cy = h // 2
+        cv2.circle(img, (s_cx, s_cy), 1, (0, 255, 0))
+        labels, boxes, scores = predictor.predict(img)
+        for box in boxes:
+            cx = (box[0] + box[2]) // 2
+            cy = (box[1] + box[3]) // 2
+            cv2.rectangle(img, (box[0], box[1]), (box[2], box[3]), (255, 0, 0))
+            cv2.circle(img, (cx, cy), 1, (0, 255, 0))
+            print("-" * 50)
+            print("dx:", cx - s_cx, "dy:", cy - s_cy)
+            print("-" * 50)
         cv2.rectangle(img, (x0, y0), (x1, y1), (255, 0, 0))
         cv2.imshow("res", img)
         if cv2.waitKey() == 27:
             break
 
     cv2.destroyAllWindows()
+    exit()
 
 
 def test_onnx():
@@ -129,10 +144,105 @@ def test_lg_mouse():
     # key_click("q")
 
 
-if __name__ == '__main__':
-    import ctypes as ct
+class CalcMove(Module):
+    def __init__(self, w):
+        super().__init__()
+        self.width = w
+        # self.rate = torch.nn.Parameter(torch.tensor(1.))
+        self.bias = torch.nn.Parameter(torch.tensor(-0.1544615477323532))
+        self.fov = torch.nn.Parameter(torch.tensor(3.610305070877075))
+        self.k = torch.nn.Parameter(torch.tensor(-83.54377746582031))
 
+    def forward(self, x):
+        h = self.width / 2 / torch.tan(self.fov / 2)
+        move = torch.atan(x / h) * self.k + self.bias
+        return move
+
+
+def loss(yp, y):
+    l = 0.5 * ((y - yp) ** 2)
+    return l.mean()
+
+
+class MyDataset(Dataset):
+    def __init__(self, x: list, y: list):
+        self.x = x
+        self.y = y
+        assert len(self.x) == len(self.y)
+
+    def __len__(self):
+        return len(self.x)
+
+    def __getitem__(self, item):
+        return self.x[item], self.y[item]
+
+    # def __add__(self, other: "MyDataset"):
+    #     x = self.x + other.x
+    #     y = self.y + other.y
+    #     return MyDataset(x, y)
+
+
+def train(dataset, width, epochs, device, save_name):
+    data_x, data_y = dataset
+    data = np.array([data_x, data_y]).transpose((1, 0))
+    # data_x = data_x.to(device)
+    # data_y = data_y.to(device)
+    model = CalcMove(w=width).to(device)
+    optimizer = Adam(model.parameters(), lr=0.001)
+    dataloader = DataLoader(data, len(data) // 3 * 2, sampler=RandomSampler(data))
+    # for i in range(2):
+    #     for batch in dataloader:
+    #         print(batch)
+    # exit()
+    ls = None
+    for epoch in range(epochs):
+        for batch in dataloader:
+            batch = batch.to(device)
+            bx, by = batch[:, 0], batch[:, 1]
+            y = model(bx)
+            ls = loss(y, by)
+            if epoch % 100 == 0:
+                print("loss:>>", float(ls))
+            ls.backward()
+            optimizer.step()
+            optimizer.zero_grad()
+    print("loss:>>", float(ls))
+    torch.save(model, f"weights/{save_name}")
+    fov = float(model.fov)
+    k = float(model.k)
+    bias = float(model.bias)
+    res = f"move = math.atan(x / {width} / 2 / math.tan({fov} / 2)) * {k} + {bias}"
+    print("fov:", fov, "k:", k, "bias:", bias)
+    print(res)
+
+
+if __name__ == '__main__':
+    # import ctypes as ct
+    print(sys.path)
+
+
+    exit()
+
+    # test_img()
     # test_dll()
-    test_lg_mouse()
+    # test_lg_mouse()
     # test_send_input_dll()
 
+    # dx
+    X_data_x = [38.0, 40, 23, 34, 1, 11, 44, 48, 76, 95, 64, 104, 39]
+    X_data_y = [27.0, 22, 11, 16, 0, 4, 22, 20, 33, 48, 29, 46, 19]
+    # dy
+    Y_data_x = [2.0, 18, 41, 27, 59, 47, 20, 61, 64, 18, 30, 13, 43]
+    Y_data_y = [0.0, 12, 22, 16, 32, 24, 11, 27, 30, 11, 14, 6, 20]
+
+    train([X_data_x, X_data_y], 1366, 299990, "cuda:0", "X.pt")
+    # train([Y_data_x, Y_data_y], 768, 99990, "cuda:0", "Y.pt")
+    """
+    model: k>> -81.4053955078125
+    model: fov>> 3.5958592891693115
+    model: bias>> -0.22631150484085083
+    
+    model: k>> -83.54377746582031
+    model: fov>> 3.610305070877075
+    model: bias>> -0.1544615477323532
+    """

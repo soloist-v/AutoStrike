@@ -1,3 +1,4 @@
+import math
 import os
 import time
 from sys import exit, executable
@@ -19,29 +20,6 @@ TimeEndPeriod = windll.winmm.timeEndPeriod
 
 
 # 简单检查gpu是否够格
-def check_gpu():
-    import nvidia_smi
-    import pynvml
-    try:
-        pynvml.nvmlInit()
-        gpu_handle = pynvml.nvmlDeviceGetHandleByIndex(0)  # 默认卡1
-        gpu_name = pynvml.nvmlDeviceGetName(gpu_handle)
-        memory_info = pynvml.nvmlDeviceGetMemoryInfo(gpu_handle)
-        pynvml.nvmlShutdown()
-    except FileNotFoundError as e:
-        # pynvml.nvml.NVML_ERROR_LIBRARY_NOT_FOUND
-        print(str(e))
-        nvidia_smi.nvmlInit()
-        gpu_handle = nvidia_smi.nvmlDeviceGetHandleByIndex(0)  # 默认卡1
-        gpu_name = nvidia_smi.nvmlDeviceGetName(gpu_handle)
-        memory_info = nvidia_smi.nvmlDeviceGetMemoryInfo(gpu_handle)
-        nvidia_smi.nvmlShutdown()
-    if b'RTX' in gpu_name:
-        return 2
-    memory_total = memory_info.total / 1024 / 1024
-    if memory_total > 3000:
-        return 1
-    return 0
 
 
 # 高DPI感知
@@ -94,8 +72,17 @@ def millisleep(num):
 
 
 # 简易FOV计算
-def FOV(target_move, base_len):
-    actual_move = atan(target_move / base_len) * base_len  # 弧长
+def FOV_x(target_move, width):
+    # actual_move = atan(target_move / base_len) * base_len  # 弧长
+    h = width / 2 / math.tan(3.6103 / 2)
+    actual_move = math.atan(target_move / h) * -83.54377746582 + -0.1544615477323532
+    return actual_move
+
+
+def FOV_y(target_move, width):
+    # actual_move = atan(target_move / base_len) * base_len  # 弧长
+    h = width / 2 / math.tan(3.5044732093811035 / 2)
+    actual_move = math.atan(target_move / h) * -41.59797286987305 + -0.5091857314109802
     return actual_move
 
 

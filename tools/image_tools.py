@@ -131,7 +131,7 @@ def auto_resize(img, max_w, max_h):
 
 def walk_img(dirname, recursive=True):
     if os.path.isfile(dirname):
-        yield imread(dirname)
+        yield dirname
         return
     if recursive:
         for parent, _, names in os.walk(dirname, ):

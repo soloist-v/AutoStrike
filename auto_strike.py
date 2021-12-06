@@ -1,3 +1,4 @@
+import multiprocessing
 import os
 import random
 import sys
@@ -15,7 +16,7 @@ from tools.mouse.const import VK_CODE, get_key_state
 from tools.screen_server import ScreenShoot, ScreenShootFast
 from tools.window_capture import WindowCaptureDll
 from tools.windows import find_window, get_screen_size, get_window_rect, grab_screen
-from tools.utils import set_dpi, FOV, is_admin, set_high_priority, restart
+from tools.utils import set_dpi, FOV_x, FOV_y, is_admin, set_high_priority, restart
 from tools.shared import release_last_shm
 import ctypes as ct
 import math
@@ -61,6 +62,8 @@ class ShareCoord:
 
 
 def calc_xy(dx, dy, max_val):
+    if max(dx, dy) <= max_val:
+        return dx, dy
     if abs(dx) > abs(dy):
         dy = dy / abs(dx) * max_val
         dx = max_val if dx > 0 else -max_val
@@ -113,6 +116,32 @@ def select_device(device):
     return mouse_move_relative, mouse_left_click, key_click
 
 
+class DataCollection:
+    def __init__(self, weight_path, save_name):
+        self.move_history = []
+        self.img = None
+        self.save_name = save_name
+        self.dx = []
+        self.dx_actual = []
+        self.dy = []
+        self.dy_actual = []
+        self.predictor = Predictor(weight_path, 'cuda:0', (640, 640), 0.3)
+
+    def add(self, dx, dy):
+        self.move_history.append([dx, dy])
+
+    def set_screen(self, img):
+        self.img = img
+
+    def calc_dy(self):
+        actual_dx, actual_dy = np.sum(self.move_history, 0)
+        self.dx_actual.append(actual_dx)
+        self.dy_actual.append(actual_dy)
+
+        self.result.append()
+        open(self.save_name, "ab+").write()
+
+
 class AutoStrike:
     flag_is_update_state = 0
     flag_is_run = 1
@@ -160,23 +189,31 @@ class AutoStrike:
             time.sleep(0.5)
         return x0, y0, x1, y1, hw
 
-    def control_mouse(self, dx, dy, w, h, speed):
-        rate = ((w / self.s_width * self.ratio_w) + (h / self.s_height) * self.ratio_h) * 0.5
-        dx = FOV(dx, self.side_len[0]) / self.DPI_Var * 0.971
-        dy = FOV(dy, self.side_len[1]) / self.DPI_Var * 0.971
+    def calc_move(self, dx, dy):
+        # rate = ((w / self.s_width * self.ratio_w) + (h / self.s_height) * self.ratio_h) * 0.5
+        # _m = max(abs(dx), abs(dy))
         # src_x, src_y = dx, dy
-        _m = max(abs(dx), abs(dy))
-        for i in range(100, self.s_width, 100):
-            if _m < i:
-                speed *= _m / i
-                break
-        if _m < 2:
-            pass
-        else:
-            dx *= rate * speed
-            dy *= rate * speed
+        # if _m > 8:
+        #     dx = FOV(dx, self.side_len) / self.DPI_Var * 0.971
+        #     dy = FOV(dy, self.side_len) / self.DPI_Var * 0.971
+        #     #
+        #     _m = max(abs(dx), abs(dy))
+        #     for i in range(100, self.s_width, 100):
+        #         if _m < i:
+        #             speed *= _m / i
+        #             break
+        #     if _m < 2:
+        #         pass
+        #     else:
+        #         dx *= rate * speed
+        #         dy *= rate * speed
+        #     if max(abs(dx), abs(dy)) < 4:
+        #         dx, dy = calc_xy(src_x, src_y, 2)
         # print(src_x, src_y, dx, dy, _m)
-        move_relative(dx, dy, self.move_func)
+        # dx, dy = calc_xy(src_x, src_y, 1)
+        dx = FOV_x(dx, 1366)
+        dy = FOV_y(dy, 768)
+        return dx, dy
 
     def update_win_state(self):
         print("更新窗口信息")
@@ -190,7 +227,7 @@ class AutoStrike:
         self.s_width, self.s_height = w, h
         self.client_ratio = self.s_width / self.s_height
         if hasattr(self, "screenShoot") and self.screenShoot is not None:
-            print("set screenShoot:>>", self.x0, self.y0)
+            # print("set screenShoot:>>", self.x0, self.y0)
             self.screenShoot.set_xy(self.x0, self.y0)
         self.DPI_Var = ct.windll.user32.GetDpiForWindow(self.window_hwnd) / 96
         self.DPI_Var = 1.0 if self.DPI_Var == 0.0 else self.DPI_Var
@@ -198,12 +235,14 @@ class AutoStrike:
         self.ratio_w = self.s_width / self.width
         self.ratio_h = self.s_height / self.height
         self.save_screen(x0, y0, w, h)
-        print("find windows ok:>>", w, h)
+        # print("find windows ok:>>", w, h)
 
     def save_screen(self, x0, y0, w, h):
         img = grab_screen(x0, y0, w, h)
         n = dt.datetime.now()
-        cv2.imwrite(f"images/{n.year}-{n.month}-{n.day}_{n.hour}-{n.minute}-{n.second}.png", img)
+        img_name = f"images/{n.year}-{n.month}-{n.day}_{n.hour}-{n.minute}-{n.second}.png"
+        cv2.imwrite(img_name, img)
+        print("img_name:", img_name)
 
     def get_best_object(self, boxes, scores, center):
         res = []
@@ -249,7 +288,8 @@ class AutoStrike:
         self._flags[self.flag_is_run] = val
 
     def get_side_len(self):
-        return int(self.s_width * (2 / 3)), int(self.s_height * (2 / 3))
+        # return self.s_width, self.s_height
+        return int(self.s_width * (2 / 3))
 
     def run(self):
         if self.screenShoot is None:
@@ -257,7 +297,7 @@ class AutoStrike:
             self.screenShoot = cap
         else:
             cap = self.screenShoot
-        predictor = Predictor(self.path, "cuda:0", imgsz=(self.width, self.height), conf_thres=0.2)
+        predictor = Predictor(self.path, "cuda:0", imgsz=(self.width, self.height), conf_thres=0.3)
         print("""
         启动完毕
         按键说明:
@@ -315,6 +355,8 @@ class AutoStrike:
         key_r_button = VK_CODE["r_button"]
         key_5 = VK_CODE['5']
         key_6 = VK_CODE['6']
+        move_hist = []
+        is_start = False
         while True:
             if get_key_state(key_end):  # 结束end
                 break
@@ -331,13 +373,13 @@ class AutoStrike:
             elif get_key_state(key_f):  # 更新窗口信息并截图
                 time.sleep(0.1)
                 self.is_update_state = True
-                self.update_win_state()
+                move_hist.clear()
+                is_start = True
             elif get_key_state(key_kh_left):  # '[' 键 开启自瞄
                 time.sleep(0.1)
                 print("开启。。。。。。。。。。。。。")
                 self.is_run = True
                 self.is_update_state = True
-                self.update_win_state()
             elif get_key_state(key_kh_right):  # ']' 键 暂停自瞄
                 time.sleep(0.1)
                 print("关闭。。。。。。。。。。。。")
@@ -350,18 +392,32 @@ class AutoStrike:
             self.counter = target_coord.counter
             dx = (x - self.x_center)
             dy = (y - self.y_center)
+            dx, dy = self.calc_move(dx, dy)
             if get_key_state(key_l_button):  # 鼠标左键
-                if abs(dx) <= max(1 / 4 * w, 4) and abs(dy) <= max(2 / 5 * h, 4):  # 查看是否已经指向目标
+                # if abs(dx) <= max(1 / 6 * w, 4) and abs(dy) <= max(1 / 7 * h, 4):  # 查看是否已经指向目标
+                if abs(dx) <= max(1 / 8 * w, 2) and abs(dy) <= max(1 / 8 * h, 2):  # 查看是否已经指向目标
                     # self.fire()
+                    # if len(move_hist):
+                    #     print(move_hist)
+                    #     res = np.sum(move_hist, 0)
+                    #     print(res)
+                    #     # open("result.txt", 'ab+').write(str(res).encode('utf8'))
+                    #     move_hist.clear()
+                    #     is_start = False
                     continue
-                self.control_mouse(dx, dy - h * 0.37, w, h, 0.5)
+                move_x, move_y = dx * 0.8, dy * 0.8
+                move_relative(move_x, move_y, self.move_func)
+                # if is_start:
+                #     print("add")
+                #     move_hist.append([round(move_x), round(move_y)])
             if get_key_state(key_r_button):  # 鼠标右键
-                if abs(dx) <= 1 / 4 * w and abs(dy) <= 2 / 5 * h:  # 查看是否已经指向目标
+                if abs(dx) <= 5 and abs(dy) <= 5:  # 查看是否已经指向目标
                     self.fire()
                     if sniper:
                         self.switch_weapon()
                     continue
-                self.control_mouse(dx, dy, w, h, 0.3)
+                move_x, move_y = dx * 0.4, dy * 0.4
+                move_relative(move_x, move_y, self.move_func)
 
     def start(self):
         if self._proc is not None:
@@ -372,9 +428,11 @@ class AutoStrike:
 
 
 def main():
+    set_dpi()
     os.makedirs("images", exist_ok=True)
     release_last_shm()  # 开始之前调用一下，防止之前异常推出后未释放共享内存
     if is_admin():
+        print("start")
         device = input(
             "选择设备:\n\t0----WinApi_SendInput\n\t1----罗技_GHUB\n\t2----飞易来\n\t3----MO_BOX\n\t默认自动选择\n\t").strip()
         device = int(device) if device.isdigit() else None
@@ -391,4 +449,6 @@ def main():
 
 
 if __name__ == '__main__':
+    import ast
+    multiprocessing.freeze_support()
     main()

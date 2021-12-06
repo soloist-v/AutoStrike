@@ -30,8 +30,11 @@ def make_dll_meta(dll_path):
             cls.__dll = dll
             return cls
 
-        def close(cls):
-            if hasattr(cls, "close"):
-                cls.close(cls)
+        # def close(cls):
+        #     if hasattr(cls, "close"):
+        #         cls.close(cls)
+        #
+        # def __del__(self):
+        #     self.close()
 
     return DllMeta
