@@ -149,13 +149,13 @@ class CalcMove(Module):
         super().__init__()
         self.width = w
         # self.rate = torch.nn.Parameter(torch.tensor(1.))
-        self.bias = torch.nn.Parameter(torch.tensor(-0.1544615477323532))
-        self.fov = torch.nn.Parameter(torch.tensor(3.610305070877075))
-        self.k = torch.nn.Parameter(torch.tensor(-83.54377746582031))
+        # self.bias = torch.nn.Parameter(torch.tensor(-0.1544615477323532))
+        self.fov = torch.nn.Parameter(torch.tensor(4.311687469482422))
+        self.k = torch.nn.Parameter(torch.tensor(-535.1670532226562))
 
     def forward(self, x):
         h = self.width / 2 / torch.tan(self.fov / 2)
-        move = torch.atan(x / h) * self.k + self.bias
+        move = torch.atan(x / h) * self.k
         return move
 
 
@@ -184,12 +184,13 @@ class MyDataset(Dataset):
 
 def train(dataset, width, epochs, device, save_name):
     data_x, data_y = dataset
-    data = np.array([data_x, data_y]).transpose((1, 0))
+    # data = np.array([data_x, data_y]).transpose((1, 0))
+    data = MyDataset(data_x, data_y)
     # data_x = data_x.to(device)
     # data_y = data_y.to(device)
     model = CalcMove(w=width).to(device)
     optimizer = Adam(model.parameters(), lr=0.001)
-    dataloader = DataLoader(data, len(data) // 3 * 2, sampler=RandomSampler(data))
+    dataloader = DataLoader(data, len(data), sampler=RandomSampler(data))
     # for i in range(2):
     #     for batch in dataloader:
     #         print(batch)
@@ -210,18 +211,13 @@ def train(dataset, width, epochs, device, save_name):
     torch.save(model, f"weights/{save_name}")
     fov = float(model.fov)
     k = float(model.k)
-    bias = float(model.bias)
-    res = f"move = math.atan(x / {width} / 2 / math.tan({fov} / 2)) * {k} + {bias}"
-    print("fov:", fov, "k:", k, "bias:", bias)
+    res = f"move = math.atan(x / (({width} / 2) / math.tan({fov} / 2))) * {k}"
+    print("fov:", fov, "k:", k)
     print(res)
 
 
 if __name__ == '__main__':
     # import ctypes as ct
-    print(sys.path)
-
-
-    exit()
 
     # test_img()
     # test_dll()
@@ -235,7 +231,7 @@ if __name__ == '__main__':
     Y_data_x = [2.0, 18, 41, 27, 59, 47, 20, 61, 64, 18, 30, 13, 43]
     Y_data_y = [0.0, 12, 22, 16, 32, 24, 11, 27, 30, 11, 14, 6, 20]
 
-    train([X_data_x, X_data_y], 1366, 299990, "cuda:0", "X.pt")
+    train([X_data_x, X_data_y], 1920, 99999 * 5, "cpu", "X.pt")
     # train([Y_data_x, Y_data_y], 768, 99990, "cuda:0", "Y.pt")
     """
     model: k>> -81.4053955078125
