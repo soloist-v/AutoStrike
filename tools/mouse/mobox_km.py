@@ -34,6 +34,7 @@ try:
     else:
         print("km 未连接")
 except com_error:
+    print("error!!!")
     STATE = False
     mk = None
 
