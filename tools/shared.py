@@ -72,9 +72,9 @@ def release_last_shm():
     return SharedMemoryRecorder.release_last_sm()
 
 
-class Array(np.ndarray, SharedMemoryRecorder):
+class Array(ndarray, SharedMemoryRecorder):
 
-    def __new__(cls, shape, dtype: Union[str, np.dtype, np.object] = None, name=None, create=True, offset=0,
+    def __new__(cls, shape, dtype: Union[str, np.dtype, object] = None, name=None, create=True, offset=0,
                 strides=None, order=None):
         if not isinstance(dtype, np.dtype):
             dtype = np.dtype(dtype)
@@ -89,15 +89,26 @@ class Array(np.ndarray, SharedMemoryRecorder):
     def name(self):
         if hasattr(self, "buf"):
             return self.buf.name
-        return None
+        raise Exception("此数组发生了转移/copy")
 
     def close(self):
-        if hasattr(self, "buf"):
-            self.buf.close()
-            self.buf.unlink()
+        if not hasattr(self, "buf"):
+            raise Exception("此数组发生了转移/copy")
+        self.buf.close()
+        self.buf.unlink()
+
+    def release(self):
+        self.close()
 
     def __reduce__(self):
-        return Array, (self.shape, self.dtype, self.buf.name, False)
+        return Array, (self.shape, self.dtype, self.name, False)
+
+    def copy(self, order='C'):
+        # return np.ndarray(self.shape, self.dtype, self.data).copy(order)
+        return np.copy(self.data, order)
+
+    # def __del__(self):
+    #     self.close()
 
 
 class Value:
