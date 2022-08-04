@@ -3,6 +3,8 @@ import json
 import numpy as np
 from ctypes import c_uint8, sizeof, POINTER, cast, WinError
 from typing import Union, List
+from numpy import ndarray
+import ctypes as ct
 import os
 import secrets
 from .filelock import FileLock
@@ -199,6 +201,17 @@ class SharedStructureOld(SharedMemoryRecorder):
     @property
     def name(self):
         return self.sm.name
+
+
+class _Nop:
+    def __init__(self, *args, **kwargs):
+        pass
+
+
+class FieldMeta(type):
+    def __new__(mcs, what: str, bases, attr_dict):
+        cls = super().__new__(mcs, what, (_Nop,), attr_dict)
+        return cls
 
 
 class SharedField(ndarray, metaclass=FieldMeta):
