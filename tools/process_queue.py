@@ -1,4 +1,5 @@
-from tools.shared import SharedStructure
+from tools.shared import SharedStructure, SharedField, SharedFieldUint8, SharedFieldInt, SharedFieldInt32, \
+    SharedFieldInt64
 import multiprocessing as mp
 from time import time
 from queue import Empty, Full
@@ -41,6 +42,13 @@ def roundup_pow_of_two(n):
 
 
 class Queue:
+    class Field(SharedStructure):
+        def __init__(self):
+            super().__init__()
+            self.in_ = SharedFieldInt32(1)
+            self.out_ = SharedFieldInt32(1)
+            self.buf = SharedFieldUint8(1)
+
     @property
     def _in(self):
         return self.__in[0]
@@ -67,10 +75,10 @@ class Queue:
         self.lock = mp.Lock()
         self.not_full = mp.Condition(self.lock)
         self.not_empty = mp.Condition(self.lock)
-        self.sm = SharedStructure(in_=(1, c_uint32), out_=(1, c_uint32), buf=(self.size, c_uint8))
-        self.__in = self.sm.fields.in_
-        self.__out = self.sm.fields.out_
-        self._buffer = self.sm.fields.buf
+        self.sm = self.Field()
+        self.__in = self.sm.in_
+        self.__out = self.sm.out_
+        self._buffer = self.sm.buf
 
     def _qsize(self):
         _in = (self._in & (self.size - 1))

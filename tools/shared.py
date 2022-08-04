@@ -33,20 +33,6 @@ def _make_filename():
     return name
 
 
-#
-# def release_last_sm(cache_names_file):
-#     print("release_last_sm .....")
-#     if os.path.exists(cache_names_file):
-#         for name, size, shm_id in json.loads(open(cache_names_file, 'rb').read()):
-#             try:
-#                 sm = SharedMemory(name, False, size)
-#                 sm.close()
-#                 sm.unlink()
-#             except Exception as e:
-#                 print(e)
-#         os.remove(cache_names_file)
-
-
 class SharedMemoryRecorder:
     cache_names_file = f"{base_dir}/.sm_names"
     lock = FileLock(f"{base_dir}/.lock")
@@ -97,6 +83,12 @@ class Array(np.ndarray, SharedMemoryRecorder):
         cls.save_sm_name(buf.name, buf.size)
         return obj
 
+    @property
+    def name(self):
+        if hasattr(self, "buf"):
+            return self.buf.name
+        return None
+
     def close(self):
         if hasattr(self, "buf"):
             self.buf.close()
@@ -104,9 +96,6 @@ class Array(np.ndarray, SharedMemoryRecorder):
 
     def __reduce__(self):
         return Array, (self.shape, self.dtype, self.buf.name, False)
-
-    def __del__(self):
-        self.close()
 
 
 class Value:
@@ -163,7 +152,7 @@ class Dict(object):
         self.__dict__[key] = value
 
 
-class SharedStructure(SharedMemoryRecorder):
+class SharedStructureOld(SharedMemoryRecorder):
 
     def __init__(self, *var_ls, name=None, create=True, **kwargs):
         self.sm = None
@@ -210,6 +199,90 @@ class SharedStructure(SharedMemoryRecorder):
     @property
     def name(self):
         return self.sm.name
+
+
+class SharedField(ndarray, metaclass=FieldMeta):
+    def __init__(self, length, c_type: Any = c_uint8, value=0):
+        super().__init__(())
+        self.name = None
+        self.length = length
+        self.c_type = c_type
+        self.value = value
+
+
+class SharedFieldUint8(SharedField):
+    def __init__(self, length, value=0):
+        super().__init__(length, c_uint8, value)
+
+
+class SharedFieldInt(SharedField):
+    def __init__(self, length, value=0):
+        super().__init__(length, ct.c_int, value)
+
+
+class SharedFieldInt64(SharedField):
+    def __init__(self, length, value=0):
+        super().__init__(length, ct.c_int64, value)
+
+
+class SharedFieldInt32(SharedField):
+    def __init__(self, length, value=0):
+        super().__init__(length, ct.c_int32, value)
+
+
+def create_shared(self, name, create, fields):
+    total_size = 0
+    for field in fields:
+        total_size += field.length * sizeof(field.c_type)
+    buf = zeros(total_size, c_uint8, name, create)
+    setattr(self, "$buf", buf)
+    setattr(self, "$name", buf.name)
+    setattr(self, "$fields", fields)
+    buffer = buf.buf.buf
+    offset = 0
+    for field in fields:
+        arr = np.ndarray((field.length,), field.c_type, buffer, offset=offset)
+        arr[:] = field.value
+        setattr(self, field.name, arr)
+        offset += field.length * sizeof(field.c_type)
+    return self
+
+
+class SharedStructureMeta(type):
+    def __call__(cls, *args, **kwargs):
+        self = super().__call__(*args, **kwargs)
+        name = getattr(self, "$name")
+        create = getattr(self, "$create")
+        fields: List[SharedField] = []
+        for k, v in vars(self).items():
+            if isinstance(v, SharedField):
+                if k in {"get_sm_name", "close"}:
+                    raise Exception("Field name error")
+                v.name = k
+                fields.append(v)
+        create_shared(self, name, create, fields)
+        return self
+
+
+class SharedStructure(metaclass=SharedStructureMeta):
+
+    def __init__(self, name=None, create=True):
+        setattr(self, "$name", name)
+        setattr(self, "$create", create)
+
+    def get_sm_name(self):
+        return getattr(self, "$buf").name
+
+    def close(self):
+        return getattr(self, "$buf").close()
+
+    def __getstate__(self):
+        return self.get_sm_name(), getattr(self, "$fields")
+
+    def __setstate__(self, state):
+        name, fields = state
+        SharedStructure.__init__(self, name, False)
+        create_shared(self, name, False, fields)
 
 
 if __name__ == '__main__':
