@@ -269,7 +269,7 @@ class SharedStructureMeta(type):
         fields: List[SharedField] = []
         for k, v in vars(self).items():
             if isinstance(v, SharedField):
-                if k in {"get_sm_name", "close"}:
+                if k in {"close"}:
                     raise Exception("Field name error")
                 v.name = k
                 fields.append(v)
@@ -283,14 +283,11 @@ class SharedStructure(metaclass=SharedStructureMeta):
         setattr(self, "$name", name)
         setattr(self, "$create", create)
 
-    def get_sm_name(self):
-        return getattr(self, "$buf").name
-
     def close(self):
         return getattr(self, "$buf").close()
 
     def __getstate__(self):
-        return self.get_sm_name(), getattr(self, "$fields")
+        return getattr(self, "$buf").name, getattr(self, "$fields")
 
     def __setstate__(self, state):
         name, fields = state
