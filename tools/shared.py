@@ -270,7 +270,7 @@ class SharedStructureMeta(type):
         for k, v in vars(self).items():
             if isinstance(v, SharedField):
                 if k in {"close"}:
-                    raise Exception("Field name error")
+                    raise Exception(f"Field name error '{k}'")
                 v.name = k
                 fields.append(v)
         create_shared(self, name, create, fields)
